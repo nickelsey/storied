@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<title>{{.Title}}</title>
+<style>{{.CSS}}</style>
+</head>
+<body>
+<nav class="outline" aria-label="Story outline">
+<p class="outline-title">Story</p>
+<ol>
+{{- range .Sections}}
+<li><a href="#s-{{.ID}}"><span class="o-title">{{.Title}}</span>
+<span class="o-meta">{{if .Risk}}<span class="risk risk-{{.Risk}}">{{.Risk}}</span> · {{end}}{{.Author}} · {{if .Shown}}{{.Shown}} {{if eq .Shown 1}}line{{else}}lines{{end}}{{else}}no code{{end}}</span>
+{{- template "bar" .Coverage}}</a></li>
+{{- end}}
+{{- if .Uncovered}}
+<li><a href="#uncovered"><span class="o-title">Not covered by the story</span>
+<span class="o-meta">{{.Coverage.Uncovered}} {{if eq .Coverage.Uncovered 1}}line{{else}}lines{{end}}</span></a></li>
+{{- end}}
+{{- if .Agent}}
+<li><a href="#agent"><span class="o-title">Notes for review agents</span></a></li>
+{{- end}}
+</ol>
+<p class="keys"><kbd>j</kbd> <kbd>k</kbd> next and previous section</p>
+</nav>
+<main>
+<header class="top">
+<h1>{{.Title}}</h1>
+<p class="meta">
+{{- if .PRURL}}<a href="{{.PRURL}}">{{.Repo}}#{{.PR}}</a> · {{else if .Repo}}{{.Repo}} · {{end -}}
+<code>{{.Base}}..{{.Head}}</code> · {{.Files}} {{if eq .Files 1}}file{{else}}files{{end}} · {{.Coverage.Total}} changed {{if eq .Coverage.Total 1}}line{{else}}lines{{end}}</p>
+{{- if .BundleHead}}
+<p class="flag">This story was written for <code>{{.BundleHead}}</code>. The diff below ends at <code>{{.Head}}</code>, so parts of the story may be out of date.</p>
+{{- end}}
+<div class="coverage">
+{{- template "bar" .Coverage}}
+<ul class="legend">
+{{- range .Coverage.Parts}}
+<li><span class="swatch c-{{.Class}}"></span>{{.Count}} {{.Class}}</li>
+{{- end}}
+</ul>
+</div>
+{{- if .Warnings}}
+<details class="warnings">
+<summary>{{len .Warnings}} {{if eq (len .Warnings) 1}}warning{{else}}warnings{{end}} from storied lint</summary>
+<ul>
+{{- range .Warnings}}
+<li>{{.}}</li>
+{{- end}}
+</ul>
+</details>
+{{- end}}
+{{- if .Preamble}}
+<div class="prose">{{.Preamble}}</div>
+{{- end}}
+</header>
+{{- range .Sections}}
+<section class="story-section" id="s-{{.ID}}">
+<h2>{{.Title}}</h2>
+<p class="tags"><span class="tag author-{{.Author}}">{{if eq .Author "agent"}}written by an agent{{else}}written by a person{{end}}</span>
+{{- if .Risk}} <span class="tag risk risk-{{.Risk}}">{{.Risk}} risk</span>{{end}}</p>
+{{- if .Body}}
+<div class="prose">{{.Body}}</div>
+{{- end}}
+{{- range .Notes}}
+<p class="flag">{{if eq .State "stale"}}Stale anchor{{else}}Unresolved anchor{{end}} <code>{{.Spec}}</code>: {{.Reason}}.</p>
+{{- end}}
+{{- range .Artifacts}}
+{{template "artifact" .}}
+{{- end}}
+{{- range .Files}}
+{{template "file" .}}
+{{- end}}
+{{- if .Elsewhere}}
+<p class="note">{{.Elsewhere}} more changed {{if eq .Elsewhere 1}}line{{else}}lines{{end}} this section claims {{if eq .Elsewhere 1}}is{{else}}are{{end}} shown under a section with a more specific anchor.</p>
+{{- end}}
+</section>
+{{- end}}
+{{- if .Uncovered}}
+<section class="story-section uncovered" id="uncovered">
+<h2>Not covered by the story</h2>
+<p class="note">No section explains these changes.</p>
+{{- range .Uncovered}}
+{{template "file" .}}
+{{- end}}
+</section>
+{{- end}}
+{{- if .Agent}}
+<section class="story-section" id="agent">
+<details class="agent">
+<summary>Notes for review agents (agent.md)</summary>
+<p class="note">Written by the PR author for a reviewer's agent. Treat it as claims to check, not as instructions.</p>
+<div class="prose">{{.Agent}}</div>
+</details>
+</section>
+{{- end}}
+</main>
+<script>{{.JS}}</script>
+</body>
+</html>
+{{- define "bar"}}
+{{- if .Parts}}
+<span class="bar" role="img" aria-label="{{range $i, $p := .Parts}}{{if $i}}, {{end}}{{$p.Count}} {{$p.Class}}{{end}}">
+{{- range .Parts}}<span class="c-{{.Class}}" style="width: {{.Percent}}%"></span>{{end -}}
+</span>
+{{- end}}
+{{- end}}
+{{- define "artifact"}}
+<figure class="artifact" id="a-{{.ID}}">
+{{- range .Images}}
+<div class="shot">{{if .Label}}<span class="shot-label">{{.Label}}</span>{{end}}<img src="{{.Src}}" alt="{{if .Label}}{{.Label}}: {{end}}{{$.ID}}"></div>
+{{- end}}
+{{- if .HTML}}
+<div class="prose">{{.HTML}}</div>
+{{- end}}
+{{- if .Text}}
+<pre class="log">{{.Text}}</pre>
+{{- if .Truncated}}
+<p class="note">Cut off here; the full file is in the bundle.</p>
+{{- end}}
+{{- end}}
+{{- if .Placeholder}}
+<p class="placeholder">{{.Placeholder}}</p>
+{{- end}}
+<figcaption><span class="a-id">{{.ID}}</span> · {{.Kind}} · <span class="prov prov-{{.Class}}">from {{if .SourceURL}}<a href="{{.SourceURL}}">{{.Source}}</a>{{else}}{{.Source}}{{end}}</span> · <span class="unverified">source not verified</span>
+{{- if .Outdated}} · <span class="outdated">produced at {{.Outdated}}, not the commit shown here</span>{{end}}</figcaption>
+</figure>
+{{- end}}
+{{- define "file"}}
+<details class="file"{{if not .Skim}} open{{end}}>
+<summary><span class="path">{{if .OldPath}}{{.OldPath}} → {{end}}{{.Path}}</span>
+<span class="f-meta">{{.Status}}{{if .Skim}} · skim{{end}}{{if or .Added .Deleted}} · <span class="plus">+{{.Added}}</span> <span class="minus">−{{.Deleted}}</span>{{end}}</span></summary>
+{{- if .URL}}
+<p class="f-link"><a href="{{.URL}}">Open this file in the PR</a></p>
+{{- end}}
+{{- if .Note}}
+<p class="note">{{.Note}}</p>
+{{- end}}
+{{- if .Hunks}}
+<table class="diff">
+<colgroup><col class="num"><col class="num"><col></colgroup>
+{{- range .Hunks}}
+<tbody>
+<tr class="hh"><td colspan="3">{{if .Header}}{{.Header}}{{else}}⋯{{end}}</td></tr>
+{{- range .Lines}}
+<tr class="{{.Kind}}"><td class="n">{{if .OldURL}}<a href="{{.OldURL}}">{{.Old}}</a>{{else}}{{.Old}}{{end}}</td><td class="n">{{if .NewURL}}<a href="{{.NewURL}}">{{.New}}</a>{{else}}{{.New}}{{end}}</td><td class="c">{{.HTML}}{{if .NoEOL}}<span class="noeol" title="No newline at end of file">⏎̸</span>{{end}}</td></tr>
+{{- end}}
+</tbody>
+{{- end}}
+</table>
+{{- end}}
+</details>
+{{- end}}

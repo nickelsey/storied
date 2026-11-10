@@ -1,0 +1,313 @@
+{
+  "bundle": "BUNDLE",
+  "base": "4693b12789f60be4c5ce7d8374bf60716bbdcf0f",
+  "head": "7bc5c47b9df621f9dacebf065a42bc527d7487e0",
+  "written": true,
+  "sections": [
+    {
+      "id": "why",
+      "title": "Why",
+      "author": "human",
+      "status": "kept",
+      "line": 5,
+      "needs_prose": false,
+      "anchors": [],
+      "files": []
+    },
+    {
+      "id": "top-level",
+      "title": "Changes at the top level",
+      "author": "agent",
+      "status": "new",
+      "line": 9,
+      "needs_prose": true,
+      "anchors": [
+        {
+          "line": 10,
+          "kind": "path",
+          "spec": "path=\"README.md\"",
+          "state": "exact",
+          "lines": 2
+        },
+        {
+          "line": 11,
+          "kind": "path",
+          "spec": "path=\"logo.png\"",
+          "state": "exact",
+          "lines": 1
+        }
+      ],
+      "files": [
+        {
+          "path": "README.md",
+          "status": "modified",
+          "added": 1,
+          "deleted": 1,
+          "hunks": [
+            {
+              "old_start": 1,
+              "old_lines": 3,
+              "new_start": 1,
+              "new_lines": 3
+            }
+          ]
+        },
+        {
+          "path": "logo.png",
+          "status": "modified",
+          "added": 0,
+          "deleted": 0,
+          "hunks": []
+        }
+      ]
+    },
+    {
+      "id": "core-mesh",
+      "title": "Changes in core/mesh",
+      "author": "agent",
+      "status": "new",
+      "line": 13,
+      "needs_prose": true,
+      "anchors": [
+        {
+          "line": 14,
+          "kind": "path",
+          "spec": "path=\"core/mesh/legacy.py\"",
+          "state": "exact",
+          "lines": 6
+        },
+        {
+          "line": 15,
+          "kind": "path",
+          "spec": "path=\"core/mesh/repair.py\"",
+          "state": "exact",
+          "lines": 13
+        }
+      ],
+      "files": [
+        {
+          "path": "core/mesh/legacy.py",
+          "status": "deleted",
+          "added": 0,
+          "deleted": 6,
+          "hunks": [
+            {
+              "old_start": 1,
+              "old_lines": 6,
+              "new_start": 0,
+              "new_lines": 0
+            }
+          ]
+        },
+        {
+          "path": "core/mesh/repair.py",
+          "status": "modified",
+          "added": 11,
+          "deleted": 2,
+          "hunks": [
+            {
+              "old_start": 5,
+              "old_lines": 8,
+              "new_start": 5,
+              "new_lines": 9,
+              "header": "import numpy as np"
+            },
+            {
+              "old_start": 17,
+              "old_lines": 3,
+              "new_start": 18,
+              "new_lines": 11,
+              "header": "def fill_holes(mesh):"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tests-core-mesh-repair-py",
+      "title": "Tests for core/mesh/repair.py",
+      "author": "agent",
+      "status": "new",
+      "line": 17,
+      "needs_prose": true,
+      "anchors": [
+        {
+          "line": 18,
+          "kind": "path",
+          "spec": "path=\"tests/export/test_repair.py\"",
+          "state": "exact",
+          "lines": 5
+        }
+      ],
+      "files": [
+        {
+          "path": "tests/export/test_repair.py",
+          "status": "added",
+          "added": 5,
+          "deleted": 0,
+          "hunks": [
+            {
+              "old_start": 0,
+              "old_lines": 0,
+              "new_start": 1,
+              "new_lines": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "docs-new-name-md",
+      "title": "docs/new-name.md",
+      "author": "agent",
+      "status": "new",
+      "line": 20,
+      "needs_prose": true,
+      "anchors": [
+        {
+          "line": 21,
+          "kind": "path",
+          "spec": "path=\"docs/new-name.md\"",
+          "state": "exact",
+          "lines": 1
+        }
+      ],
+      "files": [
+        {
+          "path": "docs/new-name.md",
+          "status": "renamed",
+          "added": 0,
+          "deleted": 0,
+          "hunks": []
+        }
+      ]
+    },
+    {
+      "id": "plugins-blender-export-py",
+      "title": "plugins/blender/export.py",
+      "author": "agent",
+      "status": "new",
+      "line": 23,
+      "needs_prose": true,
+      "anchors": [
+        {
+          "line": 24,
+          "kind": "path",
+          "spec": "path=\"plugins/blender/export.py\"",
+          "state": "exact",
+          "lines": 5
+        }
+      ],
+      "files": [
+        {
+          "path": "plugins/blender/export.py",
+          "status": "modified",
+          "added": 4,
+          "deleted": 1,
+          "hunks": [
+            {
+              "old_start": 1,
+              "old_lines": 6,
+              "new_start": 1,
+              "new_lines": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tools-run-sh",
+      "title": "tools/run.sh",
+      "author": "agent",
+      "status": "new",
+      "line": 26,
+      "needs_prose": true,
+      "anchors": [
+        {
+          "line": 27,
+          "kind": "path",
+          "spec": "path=\"tools/run.sh\"",
+          "state": "exact",
+          "lines": 1
+        }
+      ],
+      "files": [
+        {
+          "path": "tools/run.sh",
+          "status": "modified",
+          "added": 0,
+          "deleted": 0,
+          "hunks": []
+        }
+      ]
+    },
+    {
+      "id": "tests-fixtures-meshes",
+      "title": "Tests in tests/fixtures/meshes",
+      "author": "agent",
+      "status": "new",
+      "line": 29,
+      "needs_prose": true,
+      "anchors": [
+        {
+          "line": 30,
+          "kind": "path",
+          "spec": "path=\"tests/fixtures/meshes/cube.obj\"",
+          "state": "exact",
+          "lines": 1
+        }
+      ],
+      "files": [
+        {
+          "path": "tests/fixtures/meshes/cube.obj",
+          "status": "modified",
+          "added": 1,
+          "deleted": 0,
+          "hunks": [
+            {
+              "old_start": 1,
+              "old_lines": 2,
+              "new_start": 1,
+              "new_lines": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "generated",
+      "title": "Lockfiles, generated and vendored files",
+      "author": "agent",
+      "status": "new",
+      "line": 32,
+      "needs_prose": true,
+      "anchors": [
+        {
+          "line": 33,
+          "kind": "glob",
+          "spec": "glob=\"deps.lock\" skim",
+          "state": "exact",
+          "lines": 2
+        }
+      ],
+      "files": [
+        {
+          "path": "deps.lock",
+          "status": "modified",
+          "added": 1,
+          "deleted": 1,
+          "hunks": [
+            {
+              "old_start": 1,
+              "old_lines": 1,
+              "new_start": 1,
+              "new_lines": 1
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "attention": [],
+  "unanchored": []
+}

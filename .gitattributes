@@ -1,0 +1,2 @@
+# Check out with LF everywhere so fixture checksums match on Windows.
+* text=auto eol=lf

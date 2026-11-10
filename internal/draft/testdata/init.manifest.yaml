@@ -1,0 +1,6 @@
+schema: storied/v1
+base_ref: main
+base_sha: 4693b12789f60be4c5ce7d8374bf60716bbdcf0f
+head_sha: 7bc5c47b9df621f9dacebf065a42bc527d7487e0
+generated_by: { tool: storied/test }
+artifacts: []

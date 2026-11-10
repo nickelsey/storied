@@ -1,0 +1,162 @@
+{
+  "Manifest": {
+    "Schema": "storied/v1",
+    "Repo": "org/cad-integration",
+    "PR": 482,
+    "BaseRef": "main",
+    "BaseSHA": "3f1c9a2b3f1c9a2b3f1c9a2b3f1c9a2b3f1c9a2b",
+    "HeadSHA": "9be04d7c9be04d7c9be04d7c9be04d7c9be04d7c",
+    "GeneratedBy": {
+      "Tool": "storied/0.1.0",
+      "Agent": "copilot-cli"
+    },
+    "Sections": {
+      "repair-pass": {
+        "Hash": "0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    },
+    "Artifacts": [
+      {
+        "ID": "mesh-compare",
+        "Kind": "image-compare",
+        "Before": "artifacts/mesh-before.png",
+        "After": "artifacts/mesh-after.png",
+        "SHA256": {
+          "artifacts/mesh-before.png": "a5b85a508fe06543e24c4f84fae3a9517119877846d0341e634d94a900d66ce8"
+        },
+        "Provenance": {
+          "Class": "ci",
+          "SHA": "9be04d7c9be04d7c9be04d7c9be04d7c9be04d7c",
+          "RunURL": "https://github.com/org/cad-integration/actions/runs/1"
+        },
+        "Line": 12
+      },
+      {
+        "ID": "repair-notes",
+        "Kind": "markdown",
+        "Path": "artifacts/notes.md",
+        "Provenance": {
+          "Class": "author"
+        },
+        "Line": 22
+      },
+      {
+        "ID": "export-tests",
+        "Kind": "log",
+        "Path": "artifacts/pytest.log",
+        "SHA256": {
+          "artifacts/pytest.log": "5f43423d513847746327d35f4a26e2d12ac1cfb9385a6eb9c37fbadddb4af14a"
+        },
+        "Provenance": {
+          "Class": "reviewer-agent",
+          "Command": "pytest tests/export -q"
+        },
+        "Line": 26
+      }
+    ]
+  },
+  "Story": {
+    "Title": "Switch mesh export to watertight repair pass",
+    "Risk": "medium",
+    "Preamble": "Reviewers: start with the repair pass, the rest follows from it.",
+    "Sections": [
+      {
+        "ID": "why",
+        "Title": "Why",
+        "Author": "human",
+        "Risk": "medium",
+        "Body": "Exports from the Blender plugin occasionally produce non-manifold meshes.\n\n### Background\n\nA level-3 heading is prose, not a new section.",
+        "Line": 8
+      },
+      {
+        "ID": "repair-pass",
+        "Title": "Repair pass in the exporter",
+        "Author": "agent",
+        "Risk": "high",
+        "Anchors": [
+          {
+            "Kind": "symbol",
+            "Path": "plugins/blender/export.py",
+            "Symbol": "export_mesh",
+            "Line": 17
+          },
+          {
+            "Kind": "path",
+            "Path": "core/mesh/repair.py",
+            "Line": 18
+          },
+          {
+            "Kind": "lines",
+            "Path": "core/mesh/repair.py",
+            "Lines": {
+              "Start": 40,
+              "End": 72
+            },
+            "Line": 19
+          },
+          {
+            "Kind": "lines",
+            "Path": "core/mesh/legacy.py",
+            "Lines": {
+              "Start": 10,
+              "End": 10
+            },
+            "OldSide": true,
+            "Line": 20
+          }
+        ],
+        "Artifacts": [
+          {
+            "ID": "mesh-compare",
+            "Line": 21
+          },
+          {
+            "ID": "repair-notes",
+            "Line": 22
+          }
+        ],
+        "Body": "The exporter now calls `repair_watertight` before writing.\n\n```markdown\n## Not a section {#nope author=human}\n::anchor{path=\"inside/a/code/fence.py\"}\n```",
+        "Line": 16
+      },
+      {
+        "ID": "fixtures",
+        "Title": "Test fixtures",
+        "Author": "agent",
+        "Risk": "low",
+        "Anchors": [
+          {
+            "Kind": "glob",
+            "Glob": "tests/fixtures/meshes/**",
+            "Skim": true,
+            "Line": 32
+          },
+          {
+            "Kind": "glob",
+            "Glob": "tests/export/{test_repair,test_export}.py",
+            "Line": 33
+          },
+          {
+            "Kind": "content",
+            "Path": "tests/conftest.py",
+            "PatchID": "1111111111111111111111111111111111111111",
+            "Line": 34
+          },
+          {
+            "Kind": "commit",
+            "PatchID": "2222222222222222222222222222222222222222",
+            "Line": 35
+          }
+        ],
+        "Artifacts": [
+          {
+            "ID": "export-tests",
+            "Line": 36
+          }
+        ],
+        "Body": "",
+        "Line": 31
+      }
+    ]
+  },
+  "Agent": "# Context for review agents\n\nRun the exporter tests with `pytest tests/export -q`. They need Mesa for\noffscreen rendering; set `PYOPENGL_PLATFORM=osmesa` and do not open viewers.\n"
+}

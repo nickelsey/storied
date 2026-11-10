@@ -1,0 +1,225 @@
+{
+  "title": "Switch mesh export to watertight repair pass",
+  "base": "4693b12789f60be4c5ce7d8374bf60716bbdcf0f",
+  "head": "7bc5c47b9df621f9dacebf065a42bc527d7487e0",
+  "coverage": {
+    "total": 37,
+    "specific": 12,
+    "broad": 15,
+    "skim": 3,
+    "uncovered": 7
+  },
+  "sections": [
+    {
+      "id": "why",
+      "title": "Why",
+      "author": "human",
+      "risk": "medium",
+      "line": 8,
+      "claimed": 0,
+      "shown": 0,
+      "anchors": []
+    },
+    {
+      "id": "repair-pass",
+      "title": "Repair pass in the exporter",
+      "author": "agent",
+      "risk": "high",
+      "line": 13,
+      "claimed": 13,
+      "shown": 13,
+      "anchors": [
+        {
+          "line": 14,
+          "kind": "lines",
+          "spec": "path=\"core/mesh/repair.py\" lines=\"21-28\"",
+          "state": "exact",
+          "lines": 8
+        },
+        {
+          "line": 15,
+          "kind": "path",
+          "spec": "path=\"plugins/blender/export.py\"",
+          "state": "exact",
+          "lines": 5
+        },
+        {
+          "line": 16,
+          "kind": "symbol",
+          "spec": "path=\"plugins/blender/export.py\" symbol=\"export_mesh\"",
+          "state": "unsupported",
+          "lines": 0,
+          "reason": "symbol anchors are not resolved by this version yet"
+        }
+      ]
+    },
+    {
+      "id": "weld",
+      "title": "Welding keeps vertex order",
+      "author": "human",
+      "risk": "medium",
+      "line": 26,
+      "claimed": 17,
+      "shown": 9,
+      "anchors": [
+        {
+          "line": 27,
+          "kind": "path",
+          "spec": "path=\"core/mesh/repair.py\"",
+          "state": "exact",
+          "lines": 13
+        },
+        {
+          "line": 28,
+          "kind": "lines",
+          "spec": "path=\"core/mesh/legacy.py\" lines=\"1-4\" side=\"old\"",
+          "state": "exact",
+          "lines": 4
+        }
+      ]
+    },
+    {
+      "id": "tests",
+      "title": "Tests and fixtures",
+      "author": "agent",
+      "risk": "low",
+      "line": 32,
+      "claimed": 8,
+      "shown": 8,
+      "anchors": [
+        {
+          "line": 33,
+          "kind": "glob",
+          "spec": "glob=\"tests/**/*.py\"",
+          "state": "exact",
+          "lines": 5
+        },
+        {
+          "line": 34,
+          "kind": "glob",
+          "spec": "glob=\"tests/fixtures/**\" skim",
+          "state": "exact",
+          "lines": 1
+        },
+        {
+          "line": 35,
+          "kind": "glob",
+          "spec": "glob=\"*.lock\" skim",
+          "state": "exact",
+          "lines": 2
+        },
+        {
+          "line": 36,
+          "kind": "path",
+          "spec": "path=\"core/mesh/gone.py\"",
+          "state": "stale",
+          "lines": 0,
+          "reason": "core/mesh/gone.py is not changed in this diff"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "README.md",
+      "total": 2,
+      "specific": 0,
+      "broad": 0,
+      "skim": 0,
+      "uncovered": 2
+    },
+    {
+      "path": "core/mesh/legacy.py",
+      "total": 6,
+      "specific": 4,
+      "broad": 0,
+      "skim": 0,
+      "uncovered": 2
+    },
+    {
+      "path": "core/mesh/repair.py",
+      "total": 13,
+      "specific": 8,
+      "broad": 5,
+      "skim": 0,
+      "uncovered": 0
+    },
+    {
+      "path": "deps.lock",
+      "total": 2,
+      "specific": 0,
+      "broad": 0,
+      "skim": 2,
+      "uncovered": 0
+    },
+    {
+      "path": "docs/new-name.md",
+      "total": 1,
+      "specific": 0,
+      "broad": 0,
+      "skim": 0,
+      "uncovered": 1
+    },
+    {
+      "path": "logo.png",
+      "total": 1,
+      "specific": 0,
+      "broad": 0,
+      "skim": 0,
+      "uncovered": 1
+    },
+    {
+      "path": "plugins/blender/export.py",
+      "total": 5,
+      "specific": 0,
+      "broad": 5,
+      "skim": 0,
+      "uncovered": 0
+    },
+    {
+      "path": "tests/export/test_repair.py",
+      "total": 5,
+      "specific": 0,
+      "broad": 5,
+      "skim": 0,
+      "uncovered": 0
+    },
+    {
+      "path": "tests/fixtures/meshes/cube.obj",
+      "total": 1,
+      "specific": 0,
+      "broad": 0,
+      "skim": 1,
+      "uncovered": 0
+    },
+    {
+      "path": "tools/run.sh",
+      "total": 1,
+      "specific": 0,
+      "broad": 0,
+      "skim": 0,
+      "uncovered": 1
+    }
+  ],
+  "errors": [],
+  "warnings": [
+    {
+      "file": "story.md",
+      "line": 16,
+      "message": "anchor path=\"plugins/blender/export.py\" symbol=\"export_mesh\" claims nothing: symbol anchors are not resolved by this version yet"
+    },
+    {
+      "file": "story.md",
+      "line": 32,
+      "message": "section tests has anchors but no prose"
+    },
+    {
+      "file": "story.md",
+      "line": 36,
+      "message": "stale anchor path=\"core/mesh/gone.py\": core/mesh/gone.py is not changed in this diff"
+    },
+    {
+      "message": "7 of 37 changed lines are not covered by the story"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+schema: storied/v1
+base_ref: main
+base_sha: 4693b12789f60be4c5ce7d8374bf60716bbdcf0f
+head_sha: 7bc5c47b9df621f9dacebf065a42bc527d7487e0
+generated_by: { tool: storied/test }
+sections:
+  core-mesh:
+    hash: dd754ea348e6b0cd5e0758008557222f7edfa6ef0af877fbf5c7d4f744e0d2c7
+  docs-new-name-md:
+    hash: e731a31194efd7b1eba3f5bf316248d75d3b8135a65f9569c040ed700b7f9ead
+  generated:
+    hash: 1007dc5c3b41031579d1f56513658b36308d0af9c90426bbfde04f3be7b23c13
+  plugins-blender-export-py:
+    hash: 0adeccfcd0294a4487cbafa169bd90f83d1f630c06e98f7336b8b1f2bcba203a
+  tests-core-mesh-repair-py:
+    hash: e34925d880d9bac86e8d6ace42473f036c0ec100217957ce25129bca46eadc7f
+  tests-fixtures-meshes:
+    hash: cb461e763a7aeeddc1223e79fa929219c07ed800224cc9ba1f66d00f66502d84
+  tools-run-sh:
+    hash: a68786de9891ca48bd8489d7ee1aab4e19758768f5de5703924d9714ff6f97e0
+  top-level:
+    hash: ab591f1d82ab09c4040812e254d835e78606934b0f054103ac0cd9a6f3bc71ca
+artifacts: []

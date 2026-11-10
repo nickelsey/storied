@@ -1,0 +1,31 @@
+schema: storied/v1
+repo: org/cad-integration
+pr: 482
+base_ref: main
+base_sha: 3f1c9a2b3f1c9a2b3f1c9a2b3f1c9a2b3f1c9a2b
+head_sha: 9be04d7c9be04d7c9be04d7c9be04d7c9be04d7c
+generated_by: { tool: storied/0.1.0, agent: copilot-cli }
+sections:
+  repair-pass:
+    hash: 0000000000000000000000000000000000000000000000000000000000000000
+artifacts:
+  - id: mesh-compare
+    kind: image-compare
+    before: artifacts/mesh-before.png
+    after: artifacts/mesh-after.png
+    sha256:
+      artifacts/mesh-before.png: a5b85a508fe06543e24c4f84fae3a9517119877846d0341e634d94a900d66ce8
+    provenance:
+      class: ci
+      run_url: https://github.com/org/cad-integration/actions/runs/1
+      sha: 9be04d7c9be04d7c9be04d7c9be04d7c9be04d7c
+  - id: repair-notes
+    kind: markdown
+    path: artifacts/notes.md
+    provenance: { class: author }
+  - id: export-tests
+    kind: log
+    path: artifacts/pytest.log
+    sha256:
+      artifacts/pytest.log: 5f43423d513847746327d35f4a26e2d12ac1cfb9385a6eb9c37fbadddb4af14a
+    provenance: { class: reviewer-agent, command: "pytest tests/export -q" }

@@ -1,0 +1,17 @@
+# Build output
+/bin/
+/dist/
+*.test
+*.out
+coverage.html
+
+# Local planning notes, deliberately untracked
+/docs/
+
+# Bundle working directory created by `storied init`
+/.storied/
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/

@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<title>Switch mesh export to watertight repair pass</title>
+<style></style>
+</head>
+<body>
+<nav class="outline" aria-label="Story outline">
+<p class="outline-title">Story</p>
+<ol>
+<li><a href="#s-why"><span class="o-title">Why</span>
+<span class="o-meta"><span class="risk risk-medium">medium</span> · human · no code</span></a></li>
+<li><a href="#s-repair-pass"><span class="o-title">Repair pass in the exporter</span>
+<span class="o-meta"><span class="risk risk-high">high</span> · agent · 13 lines</span>
+<span class="bar" role="img" aria-label="8 specific, 5 broad"><span class="c-specific" style="width: 61.5%"></span><span class="c-broad" style="width: 38.4%"></span></span></a></li>
+<li><a href="#s-weld"><span class="o-title">Welding keeps vertex order</span>
+<span class="o-meta"><span class="risk risk-medium">medium</span> · human · 9 lines</span>
+<span class="bar" role="img" aria-label="4 specific, 5 broad"><span class="c-specific" style="width: 44.4%"></span><span class="c-broad" style="width: 55.5%"></span></span></a></li>
+<li><a href="#s-tests"><span class="o-title">Tests and fixtures</span>
+<span class="o-meta"><span class="risk risk-low">low</span> · agent · 8 lines</span>
+<span class="bar" role="img" aria-label="5 broad, 3 skim"><span class="c-broad" style="width: 62.5%"></span><span class="c-skim" style="width: 37.5%"></span></span></a></li>
+<li><a href="#uncovered"><span class="o-title">Not covered by the story</span>
+<span class="o-meta">7 lines</span></a></li>
+<li><a href="#agent"><span class="o-title">Notes for review agents</span></a></li>
+</ol>
+<p class="keys"><kbd>j</kbd> <kbd>k</kbd> next and previous section</p>
+</nav>
+<main>
+<header class="top">
+<h1>Switch mesh export to watertight repair pass</h1>
+<p class="meta"><a href="https://github.com/org/cad-integration/pull/482">org/cad-integration#482</a> · <code>4693b1278..7bc5c47b9</code> · 10 files · 37 changed lines</p>
+<div class="coverage">
+<span class="bar" role="img" aria-label="12 specific, 15 broad, 3 skim, 7 uncovered"><span class="c-specific" style="width: 32.4%"></span><span class="c-broad" style="width: 40.5%"></span><span class="c-skim" style="width: 8.1%"></span><span class="c-uncovered" style="width: 18.9%"></span></span>
+<ul class="legend">
+<li><span class="swatch c-specific"></span>12 specific</li>
+<li><span class="swatch c-broad"></span>15 broad</li>
+<li><span class="swatch c-skim"></span>3 skim</li>
+<li><span class="swatch c-uncovered"></span>7 uncovered</li>
+</ul>
+</div>
+<details class="warnings">
+<summary>4 warnings from storied lint</summary>
+<ul>
+<li>story.md:16: anchor path=&#34;plugins/blender/export.py&#34; symbol=&#34;export_mesh&#34; claims nothing: symbol anchors are not resolved by this version yet</li>
+<li>story.md:32: section tests has anchors but no prose</li>
+<li>story.md:36: stale anchor path=&#34;core/mesh/gone.py&#34;: core/mesh/gone.py is not changed in this diff</li>
+<li>7 of 37 changed lines are not covered by the story</li>
+</ul>
+</details>
+<div class="prose"><p>Start with the repair pass; the rest follows from it.</p>
+</div>
+</header>
+<section class="story-section" id="s-why">
+<h2>Why</h2>
+<p class="tags"><span class="tag author-human">written by a person</span> <span class="tag risk risk-medium">medium risk</span></p>
+<div class="prose"><p>Exports from the Blender plugin sometimes produce <strong>non-manifold</strong> meshes.
+See <a href="https://example.com/issues/12">the issue</a> and <!-- raw HTML omitted -->this raw HTML<!-- raw HTML omitted -->.</p>
+</div>
+</section>
+<section class="story-section" id="s-repair-pass">
+<h2>Repair pass in the exporter</h2>
+<p class="tags"><span class="tag author-agent">written by an agent</span> <span class="tag risk risk-high">high risk</span></p>
+<div class="prose"><p>The exporter now calls <code>repair_watertight</code> before writing:</p>
+<ul>
+<li>weld</li>
+<li>fill holes</li>
+</ul>
+</div>
+<p class="flag">Unresolved anchor <code>path=&#34;plugins/blender/export.py&#34; symbol=&#34;export_mesh&#34;</code>: symbol anchors are not resolved by this version yet.</p>
+
+<figure class="artifact" id="a-mesh-compare">
+<div class="shot"><span class="shot-label">Before</span><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" alt="Before: mesh-compare"></div>
+<div class="shot"><span class="shot-label">After</span><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" alt="After: mesh-compare"></div>
+<figcaption><span class="a-id">mesh-compare</span> · image-compare · <span class="prov prov-ci">from <a href="https://github.com/org/cad-integration/actions/runs/1">CI run</a></span> · <span class="unverified">source not verified</span></figcaption>
+</figure>
+
+<figure class="artifact" id="a-repair-notes">
+<div class="prose"><p>Repair is <strong>idempotent</strong>: a second pass changes nothing.</p>
+</div>
+<figcaption><span class="a-id">repair-notes</span> · markdown · <span class="prov prov-author">from the author&#39;s machine</span> · <span class="unverified">source not verified</span></figcaption>
+</figure>
+
+<figure class="artifact" id="a-drag-chart">
+<p class="placeholder">A vega-lite artifact cannot be shown on a static page, and the bundle has no fallback image.</p>
+<figcaption><span class="a-id">drag-chart</span> · vega-lite · <span class="prov prov-gpu-job">from GPU job slurm-88121</span> · <span class="unverified">source not verified</span></figcaption>
+</figure>
+
+<details class="file" open>
+<summary><span class="path">core/mesh/repair.py</span>
+<span class="f-meta">modified · <span class="plus">+8</span> <span class="minus">−0</span></span></summary>
+<p class="f-link"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2">Open this file in the PR</a></p>
+<table class="diff">
+<colgroup><col class="num"><col class="num"><col></colgroup>
+<tbody>
+<tr class="hh"><td colspan="3">def fill_holes(mesh):</td></tr>
+<tr class="ctx"><td class="n">17</td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2R18">18</a></td><td class="c"></td></tr>
+<tr class="ctx"><td class="n">18</td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2R19">19</a></td><td class="c"><span class="hk">def</span> <span class="hf">is_watertight</span>(mesh):</td></tr>
+<tr class="ctx"><td class="n">19</td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2R20">20</a></td><td class="c">    <span class="hk">return</span> <span class="hk">not</span> mesh.boundary_loops()</td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2R21">21</a></td><td class="c"></td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2R22">22</a></td><td class="c"></td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2R23">23</a></td><td class="c"><span class="hk">def</span> <span class="hf">repair_watertight</span>(mesh, tol=<span class="hn">1e-6</span>):</td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2R24">24</a></td><td class="c">    <span class="hs">&#34;&#34;&#34;Weld, then fill holes, until the mesh is closed.&#34;&#34;&#34;</span></td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2R25">25</a></td><td class="c">    mesh.vertices = weld(mesh.vertices, tol)</td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2R26">26</a></td><td class="c">    <span class="hk">if</span> <span class="hk">not</span> is_watertight(mesh):</td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2R27">27</a></td><td class="c">        fill_holes(mesh)</td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2R28">28</a></td><td class="c">    <span class="hk">return</span> mesh</td></tr>
+</tbody>
+</table>
+</details>
+
+<details class="file" open>
+<summary><span class="path">plugins/blender/export.py</span>
+<span class="f-meta">modified · <span class="plus">+4</span> <span class="minus">−1</span></span></summary>
+<p class="f-link"><a href="https://github.com/org/cad-integration/pull/482/files#diff-59d97e1507294bc0096664128376b2dc100cc640ffba44840af583e5a6331621">Open this file in the PR</a></p>
+<table class="diff">
+<colgroup><col class="num"><col class="num"><col></colgroup>
+<tbody>
+<tr class="hh"><td colspan="3">⋯</td></tr>
+<tr class="ctx"><td class="n">1</td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-59d97e1507294bc0096664128376b2dc100cc640ffba44840af583e5a6331621R1">1</a></td><td class="c"><span class="hk">from</span> core.mesh <span class="hk">import</span> io</td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-59d97e1507294bc0096664128376b2dc100cc640ffba44840af583e5a6331621R2">2</a></td><td class="c"><span class="hk">from</span> core.mesh.repair <span class="hk">import</span> repair_watertight</td></tr>
+<tr class="ctx"><td class="n">2</td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-59d97e1507294bc0096664128376b2dc100cc640ffba44840af583e5a6331621R3">3</a></td><td class="c"></td></tr>
+<tr class="ctx"><td class="n">3</td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-59d97e1507294bc0096664128376b2dc100cc640ffba44840af583e5a6331621R4">4</a></td><td class="c"></td></tr>
+<tr class="del"><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-59d97e1507294bc0096664128376b2dc100cc640ffba44840af583e5a6331621L4">4</a></td><td class="n"></td><td class="c"><span class="hk">def</span> <span class="hf">export_mesh</span>(obj, path):</td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-59d97e1507294bc0096664128376b2dc100cc640ffba44840af583e5a6331621R5">5</a></td><td class="c"><span class="hk">def</span> <span class="hf">export_mesh</span>(obj, path, repair=<span class="hk">True</span>):</td></tr>
+<tr class="ctx"><td class="n">5</td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-59d97e1507294bc0096664128376b2dc100cc640ffba44840af583e5a6331621R6">6</a></td><td class="c">    mesh = io.from_blender(obj)</td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-59d97e1507294bc0096664128376b2dc100cc640ffba44840af583e5a6331621R7">7</a></td><td class="c">    <span class="hk">if</span> repair:</td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-59d97e1507294bc0096664128376b2dc100cc640ffba44840af583e5a6331621R8">8</a></td><td class="c">        mesh = repair_watertight(mesh)  <span class="hc"># &lt;closes&gt; holes &amp; welds</span></td></tr>
+<tr class="ctx"><td class="n">6</td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-59d97e1507294bc0096664128376b2dc100cc640ffba44840af583e5a6331621R9">9</a></td><td class="c">    io.write(mesh, path)</td></tr>
+</tbody>
+</table>
+</details>
+</section>
+<section class="story-section" id="s-weld">
+<h2>Welding keeps vertex order</h2>
+<p class="tags"><span class="tag author-human">written by a person</span> <span class="tag risk risk-medium">medium risk</span></p>
+<div class="prose"><p><code>weld</code> used to return sorted, rounded copies.</p>
+</div>
+
+<details class="file" open>
+<summary><span class="path">core/mesh/legacy.py</span>
+<span class="f-meta">deleted · <span class="plus">+0</span> <span class="minus">−4</span></span></summary>
+<p class="f-link"><a href="https://github.com/org/cad-integration/pull/482/files#diff-465d8187b77caa355fdfc2a6de5027077ff553eac04037c06bdb131c604137da">Open this file in the PR</a></p>
+<table class="diff">
+<colgroup><col class="num"><col class="num"><col></colgroup>
+<tbody>
+<tr class="hh"><td colspan="3">⋯</td></tr>
+<tr class="del"><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-465d8187b77caa355fdfc2a6de5027077ff553eac04037c06bdb131c604137daL1">1</a></td><td class="n"></td><td class="c"><span class="hk">def</span> <span class="hf">close_mesh</span>(mesh):</td></tr>
+<tr class="del"><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-465d8187b77caa355fdfc2a6de5027077ff553eac04037c06bdb131c604137daL2">2</a></td><td class="n"></td><td class="c">    <span class="hc"># Old single-pass repair.</span></td></tr>
+<tr class="del"><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-465d8187b77caa355fdfc2a6de5027077ff553eac04037c06bdb131c604137daL3">3</a></td><td class="n"></td><td class="c">    mesh.fill()</td></tr>
+<tr class="del"><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-465d8187b77caa355fdfc2a6de5027077ff553eac04037c06bdb131c604137daL4">4</a></td><td class="n"></td><td class="c">    <span class="hk">return</span> mesh</td></tr>
+</tbody>
+</table>
+</details>
+
+<details class="file" open>
+<summary><span class="path">core/mesh/repair.py</span>
+<span class="f-meta">modified · <span class="plus">+3</span> <span class="minus">−2</span></span></summary>
+<p class="f-link"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2">Open this file in the PR</a></p>
+<table class="diff">
+<colgroup><col class="num"><col class="num"><col></colgroup>
+<tbody>
+<tr class="hh"><td colspan="3">import numpy as np</td></tr>
+<tr class="ctx"><td class="n">5</td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2R5">5</a></td><td class="c"></td></tr>
+<tr class="ctx"><td class="n">6</td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2R6">6</a></td><td class="c"><span class="hk">def</span> <span class="hf">weld</span>(vertices, tol=<span class="hn">1e-6</span>):</td></tr>
+<tr class="ctx"><td class="n">7</td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2R7">7</a></td><td class="c">    <span class="hs">&#34;&#34;&#34;Merge vertices closer than tol.&#34;&#34;&#34;</span></td></tr>
+<tr class="del"><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2L8">8</a></td><td class="n"></td><td class="c">    keys = np.round(vertices / tol)</td></tr>
+<tr class="del"><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2L9">9</a></td><td class="n"></td><td class="c">    <span class="hk">return</span> np.unique(keys, axis=<span class="hn">0</span>) * tol</td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2R8">8</a></td><td class="c">    keys = np.round(vertices / tol).astype(np.int64)</td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2R9">9</a></td><td class="c">    _, index = np.unique(keys, axis=<span class="hn">0</span>, return_index=<span class="hk">True</span>)</td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2R10">10</a></td><td class="c">    <span class="hk">return</span> vertices[np.sort(index)]</td></tr>
+<tr class="ctx"><td class="n">10</td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2R11">11</a></td><td class="c"></td></tr>
+<tr class="ctx"><td class="n">11</td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2R12">12</a></td><td class="c"></td></tr>
+<tr class="ctx"><td class="n">12</td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2R13">13</a></td><td class="c"><span class="hk">def</span> <span class="hf">fill_holes</span>(mesh):</td></tr>
+</tbody>
+</table>
+</details>
+<p class="note">8 more changed lines this section claims are shown under a section with a more specific anchor.</p>
+</section>
+<section class="story-section" id="s-tests">
+<h2>Tests and fixtures</h2>
+<p class="tags"><span class="tag author-agent">written by an agent</span> <span class="tag risk risk-low">low risk</span></p>
+<p class="flag">Stale anchor <code>path=&#34;core/mesh/gone.py&#34;</code>: core/mesh/gone.py is not changed in this diff.</p>
+
+<figure class="artifact" id="a-export-tests">
+<pre class="log">1 passed in 0.12s
+</pre>
+<figcaption><span class="a-id">export-tests</span> · log · <span class="prov prov-reviewer-agent">from a review agent, pytest tests/export -q</span> · <span class="unverified">source not verified</span></figcaption>
+</figure>
+
+<details class="file">
+<summary><span class="path">deps.lock</span>
+<span class="f-meta">modified · skim · <span class="plus">+1</span> <span class="minus">−1</span></span></summary>
+<p class="f-link"><a href="https://github.com/org/cad-integration/pull/482/files#diff-c87c3e89db09bebcc468a7565c93040b926bd9fd8877bef73060669d6d091466">Open this file in the PR</a></p>
+<table class="diff">
+<colgroup><col class="num"><col class="num"><col></colgroup>
+<tbody>
+<tr class="hh"><td colspan="3">⋯</td></tr>
+<tr class="del"><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-c87c3e89db09bebcc468a7565c93040b926bd9fd8877bef73060669d6d091466L1">1</a></td><td class="n"></td><td class="c">numpy==2.1.0</td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-c87c3e89db09bebcc468a7565c93040b926bd9fd8877bef73060669d6d091466R1">1</a></td><td class="c">numpy==2.2.0</td></tr>
+</tbody>
+</table>
+</details>
+
+<details class="file" open>
+<summary><span class="path">tests/export/test_repair.py</span>
+<span class="f-meta">added · <span class="plus">+5</span> <span class="minus">−0</span></span></summary>
+<p class="f-link"><a href="https://github.com/org/cad-integration/pull/482/files#diff-19cc714568fc28f5bd017f8ca741184d80e360b2944f269044bab03dde2f7cbf">Open this file in the PR</a></p>
+<table class="diff">
+<colgroup><col class="num"><col class="num"><col></colgroup>
+<tbody>
+<tr class="hh"><td colspan="3">⋯</td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-19cc714568fc28f5bd017f8ca741184d80e360b2944f269044bab03dde2f7cbfR1">1</a></td><td class="c"><span class="hk">from</span> core.mesh.repair <span class="hk">import</span> repair_watertight</td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-19cc714568fc28f5bd017f8ca741184d80e360b2944f269044bab03dde2f7cbfR2">2</a></td><td class="c"></td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-19cc714568fc28f5bd017f8ca741184d80e360b2944f269044bab03dde2f7cbfR3">3</a></td><td class="c"></td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-19cc714568fc28f5bd017f8ca741184d80e360b2944f269044bab03dde2f7cbfR4">4</a></td><td class="c"><span class="hk">def</span> <span class="hf">test_repair_closes_cube</span>(open_cube):</td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-19cc714568fc28f5bd017f8ca741184d80e360b2944f269044bab03dde2f7cbfR5">5</a></td><td class="c">    <span class="hk">assert</span> repair_watertight(open_cube).boundary_loops() == []</td></tr>
+</tbody>
+</table>
+</details>
+
+<details class="file">
+<summary><span class="path">tests/fixtures/meshes/cube.obj</span>
+<span class="f-meta">modified · skim · <span class="plus">+1</span> <span class="minus">−0</span></span></summary>
+<p class="f-link"><a href="https://github.com/org/cad-integration/pull/482/files#diff-ad827d38a296d95264d9ea5292f70d196115bc96d81dc238802d97dc740c14b0">Open this file in the PR</a></p>
+<table class="diff">
+<colgroup><col class="num"><col class="num"><col></colgroup>
+<tbody>
+<tr class="hh"><td colspan="3">⋯</td></tr>
+<tr class="ctx"><td class="n">1</td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-ad827d38a296d95264d9ea5292f70d196115bc96d81dc238802d97dc740c14b0R1">1</a></td><td class="c">v 0 0 0</td></tr>
+<tr class="ctx"><td class="n">2</td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-ad827d38a296d95264d9ea5292f70d196115bc96d81dc238802d97dc740c14b0R2">2</a></td><td class="c">v 1 0 0</td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-ad827d38a296d95264d9ea5292f70d196115bc96d81dc238802d97dc740c14b0R3">3</a></td><td class="c">v 1 1 0</td></tr>
+</tbody>
+</table>
+</details>
+</section>
+<section class="story-section uncovered" id="uncovered">
+<h2>Not covered by the story</h2>
+<p class="note">No section explains these changes.</p>
+
+<details class="file" open>
+<summary><span class="path">README.md</span>
+<span class="f-meta">modified · <span class="plus">+1</span> <span class="minus">−1</span></span></summary>
+<p class="f-link"><a href="https://github.com/org/cad-integration/pull/482/files#diff-b335630551682c19a781afebcf4d07bf978fb1f8ac04c6bf87428ed5106870f5">Open this file in the PR</a></p>
+<table class="diff">
+<colgroup><col class="num"><col class="num"><col></colgroup>
+<tbody>
+<tr class="hh"><td colspan="3">⋯</td></tr>
+<tr class="ctx"><td class="n">1</td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-b335630551682c19a781afebcf4d07bf978fb1f8ac04c6bf87428ed5106870f5R1">1</a></td><td class="c"># cad</td></tr>
+<tr class="ctx"><td class="n">2</td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-b335630551682c19a781afebcf4d07bf978fb1f8ac04c6bf87428ed5106870f5R2">2</a></td><td class="c"></td></tr>
+<tr class="del"><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-b335630551682c19a781afebcf4d07bf978fb1f8ac04c6bf87428ed5106870f5L3">3</a></td><td class="n"></td><td class="c">Mesh tools.</td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-b335630551682c19a781afebcf4d07bf978fb1f8ac04c6bf87428ed5106870f5R3">3</a></td><td class="c">Mesh tools, with repair.</td></tr>
+</tbody>
+</table>
+</details>
+
+<details class="file" open>
+<summary><span class="path">core/mesh/legacy.py</span>
+<span class="f-meta">deleted · <span class="plus">+0</span> <span class="minus">−2</span></span></summary>
+<p class="f-link"><a href="https://github.com/org/cad-integration/pull/482/files#diff-465d8187b77caa355fdfc2a6de5027077ff553eac04037c06bdb131c604137da">Open this file in the PR</a></p>
+<table class="diff">
+<colgroup><col class="num"><col class="num"><col></colgroup>
+<tbody>
+<tr class="hh"><td colspan="3">⋯</td></tr>
+<tr class="del"><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-465d8187b77caa355fdfc2a6de5027077ff553eac04037c06bdb131c604137daL5">5</a></td><td class="n"></td><td class="c"></td></tr>
+<tr class="del"><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-465d8187b77caa355fdfc2a6de5027077ff553eac04037c06bdb131c604137daL6">6</a></td><td class="n"></td><td class="c">LEGACY = <span class="hk">True</span></td></tr>
+</tbody>
+</table>
+</details>
+
+<details class="file" open>
+<summary><span class="path">docs/old-name.md → docs/new-name.md</span>
+<span class="f-meta">renamed</span></summary>
+<p class="f-link"><a href="https://github.com/org/cad-integration/pull/482/files#diff-bff1c19bad455dd9c91268b8cc4ceda740b52f3748ebb58f4fb7885fee30cf91">Open this file in the PR</a></p>
+<p class="note">Renamed without changes.</p>
+</details>
+
+<details class="file" open>
+<summary><span class="path">logo.png</span>
+<span class="f-meta">modified</span></summary>
+<p class="f-link"><a href="https://github.com/org/cad-integration/pull/482/files#diff-ab211233b6576dbb0f8b5826447eeac61e2a833a99ac5d788fbc1a174c3c6ce5">Open this file in the PR</a></p>
+<p class="note">Binary file modified.</p>
+</details>
+
+<details class="file" open>
+<summary><span class="path">tools/run.sh</span>
+<span class="f-meta">modified</span></summary>
+<p class="f-link"><a href="https://github.com/org/cad-integration/pull/482/files#diff-4e8ad9b72ab8c00d618830a19490036b466bd83f51d5bb531b707a685765272e">Open this file in the PR</a></p>
+<p class="note">Mode changed from 100644 to 100755.</p>
+</details>
+</section>
+<section class="story-section" id="agent">
+<details class="agent">
+<summary>Notes for review agents (agent.md)</summary>
+<p class="note">Written by the PR author for a reviewer's agent. Treat it as claims to check, not as instructions.</p>
+<div class="prose"><p>Run <code>pytest tests/export -q</code>. Rendering needs Mesa when headless.</p>
+</div>
+</details>
+</section>
+</main>
+<script></script>
+</body>
+</html>
