@@ -130,7 +130,7 @@ func Init(ctx context.Context, opts InitOptions) (*InitResult, error) {
 		}
 	}
 	if opts.BundleDir == "" {
-		if res.Excluded, err = exclude(ctx, repo, "/"+lint.DefaultBundleDir+"/"); err != nil {
+		if res.Excluded, err = Exclude(ctx, repo, "/"+lint.DefaultBundleDir+"/"); err != nil {
 			return nil, err
 		}
 	}
@@ -188,9 +188,9 @@ func defaultTitle(ctx context.Context, repo gitx.Repo, base, head string) string
 	return "Untitled change"
 }
 
-// exclude adds pattern to the repository's private ignore file and reports
+// Exclude adds pattern to the repository's private ignore file and reports
 // whether it had to.
-func exclude(ctx context.Context, repo gitx.Repo, pattern string) (bool, error) {
+func Exclude(ctx context.Context, repo gitx.Repo, pattern string) (bool, error) {
 	p, err := line(ctx, repo, "rev-parse", "--git-path", "info/exclude")
 	if err != nil {
 		return false, err

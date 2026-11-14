@@ -206,3 +206,48 @@ func TestInitAndDraftCommands(t *testing.T) {
 		t.Errorf("draft on an invalid story: exit %d, stderr: %s", code, errOut)
 	}
 }
+
+func TestPackAndFetchCommands(t *testing.T) {
+	f := fixture.New(t)
+	repo := "--repo=" + f.Repo.Dir
+
+	code, out, errOut := runCLI("pack", repo, "--no-push")
+	if code != ExitOK || !strings.Contains(out, "packed 8 files as refs/storied/pr-482 (") || !strings.HasSuffix(out, "not pushed\n") {
+		t.Errorf("pack --no-push: exit %d\nstdout: %s\nstderr: %s", code, out, errOut)
+	}
+	// No remote is configured, so a push fails after the local commit.
+	if code, _, errOut := runCLI("pack", repo); code != ExitError || !strings.Contains(errOut, "pushing it failed") {
+		t.Errorf("pack without a remote: exit %d, stderr: %s", code, errOut)
+	}
+
+	if code, _, errOut := runCLI("fetch", "482", repo, "--local"); code != ExitError || !strings.Contains(errOut, "was not fetched") {
+		t.Errorf("fetch over the author's bundle: exit %d, stderr: %s", code, errOut)
+	}
+	for _, args := range [][]string{
+		{"fetch", "482", repo, "--local", "--force"}, // number first
+		{"fetch", repo, "--local", "482"},            // number last; the copy may now be replaced
+	} {
+		code, out, errOut := runCLI(args...)
+		if code != ExitOK || !strings.Contains(out, "fetched 8 files into ") || !strings.HasSuffix(out, "next: storied render\n") {
+			t.Errorf("storied %s: exit %d\nstdout: %s\nstderr: %s", strings.Join(args, " "), code, out, errOut)
+		}
+	}
+	if code, _, _ := runCLI("render", repo, "-o", filepath.Join(t.TempDir(), "p.html")); code != ExitOK {
+		t.Errorf("render of the fetched bundle: exit %d", code)
+	}
+
+	for _, tt := range []struct {
+		args []string
+		want string
+	}{
+		{[]string{"fetch", repo}, "expected one pull request number"},
+		{[]string{"fetch", "482", "483", repo}, "expected one pull request number"},
+		{[]string{"fetch", "abc", repo}, `"abc" is not a pull request number`},
+		{[]string{"fetch", "0", repo}, `"0" is not a pull request number`},
+		{[]string{"pack", "482", repo}, `unexpected argument "482"`},
+	} {
+		if code, _, errOut := runCLI(tt.args...); code != ExitUsage || !strings.Contains(errOut, tt.want) {
+			t.Errorf("storied %s: exit %d, stderr: %s; want usage error %q", strings.Join(tt.args, " "), code, errOut, tt.want)
+		}
+	}
+}

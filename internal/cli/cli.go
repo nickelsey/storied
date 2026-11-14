@@ -21,9 +21,6 @@ const (
 	ExitUsage = 2
 )
 
-// ErrNotImplemented is returned by commands that are registered but not built yet.
-var ErrNotImplemented = errors.New("not implemented yet")
-
 // errFailed is returned by a command that has printed its own findings and
 // only needs the exit code set.
 var errFailed = errors.New("failed")
@@ -86,12 +83,11 @@ func commands() []command {
 		{"draft", "author's agent", "list the change blocks of the diff and which section explains each", runDraft},
 		{"lint", "author, CI", "validate the bundle, resolve anchors, report coverage and stale anchors", runLint},
 		{"render", "author, reviewer", "write one static HTML page of the diff in story order", runRender},
-		{"pack", "author", "bundle, checksum and publish the bundle for the PR", notImplemented},
+		{"pack", "author", "checksum the bundle and publish it on the PR's side ref", runPack},
+		{"fetch", "reviewer", "fetch the bundle an author published for a PR", runFetch},
 		{"version", "", "print the version", runVersion},
 	}
 }
-
-func notImplemented([]string, io.Writer, io.Writer) error { return ErrNotImplemented }
 
 func runVersion(_ []string, stdout, _ io.Writer) error {
 	_, err := fmt.Fprintf(stdout, "storied %s\n", Version)

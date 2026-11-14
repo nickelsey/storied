@@ -5,9 +5,9 @@ through its diff. Each section of the story claims the changed lines it
 explains, so a reviewer can read a large PR in story order and see which
 changes nobody explained. GitHub stays the record for comments and approvals.
 
-Status: phase 0 in progress. `init`, `draft`, `lint` and `render` work;
-`pack` is not built yet. `symbol` and `commit` anchors are parsed but not
-resolved.
+Status: phase 0. Every command works. `symbol` and `commit` anchors are
+parsed but not resolved, and publishing has only been tested against a local
+remote, not GitHub.
 
 ## How a story points at code
 
@@ -47,7 +47,8 @@ make dist    # static binaries for macOS arm64, Linux amd64, Windows amd64
 | `storied draft` | list the change blocks of the diff and which section explains each |
 | `storied lint` | validate the bundle, resolve anchors, report coverage and stale anchors |
 | `storied render` | write one static HTML page of the diff in story order |
-| `storied pack` | bundle, checksum and publish the bundle for the PR |
+| `storied pack` | checksum the bundle and publish it on the PR's side ref |
+| `storied fetch` | fetch the bundle an author published for a PR |
 
 Every working command takes `--repo`, `--bundle`, `--base` and `--head`. The
 bundle lives in `.storied/` at the repository root unless `--bundle` says
@@ -63,11 +64,19 @@ storied lint --strict        # exit 1 on warnings too
 storied lint --json          # the same report for CI and agents
 storied render               # writes .storied/story.html
 storied render -o page.html  # or - for standard output
+storied pack                 # publish the bundle on refs/storied/pr-<n> of origin
+storied fetch 482            # reviewer: fetch and verify the bundle for PR 482
 ```
 
 `draft` also brings the manifest's base and head up to date, so run it again
 after new commits or a rebase. It never rewrites a section a person wrote or
 edited.
+
+`pack` leaves the author's files alone and never touches the PR branch: the
+bundle is a commit of its own on a ref outside `refs/heads`. `fetch` refuses
+a bundle whose artifacts do not match their checksums.
+
+To have a coding agent write the story, give it `skills/storied/SKILL.md`.
 
 ## Layout
 
@@ -82,5 +91,7 @@ internal/anchor/   anchor resolution, staleness, coverage
 internal/lint/     bundle + diff + anchors into a report with warnings
 internal/draft/    init scaffold, hunk grouping, story skeleton
 internal/render/   static HTML output
+internal/pack/     publish a bundle on a side ref, fetch and verify one
 internal/fixture/  a repository with a bundle, shared by tests
+skills/storied/    instructions that teach a coding agent to write a story
 ```

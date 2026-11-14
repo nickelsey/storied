@@ -19,7 +19,7 @@ func TestRun(t *testing.T) {
 		{"version", []string{"version"}, ExitOK, "storied dev", ""},
 		{"version flag", []string{"--version"}, ExitOK, "storied dev", ""},
 		{"unknown command", []string{"nope"}, ExitUsage, "", `unknown command "nope"`},
-		{"unbuilt command", []string{"pack"}, ExitError, "", "storied pack: not implemented yet"},
+		{"command outside a repository", []string{"pack", "--repo", t.TempDir()}, ExitError, "", "storied pack: git rev-parse --show-toplevel"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

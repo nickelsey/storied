@@ -14,6 +14,7 @@ import (
 // Repo is a git repository, addressed by any directory inside its worktree.
 type Repo struct {
 	Dir string
+	Env []string // extra environment for git, as "KEY=value"
 }
 
 // Error describes a git invocation that failed.
@@ -39,7 +40,7 @@ func (r Repo) Run(ctx context.Context, args ...string) ([]byte, error) {
 	cmd := exec.CommandContext(ctx, "git", args...)
 	cmd.Dir = r.Dir
 	// LC_ALL=C keeps messages parseable; no prompt because nobody is there to answer.
-	cmd.Env = append(os.Environ(), "LC_ALL=C", "GIT_TERMINAL_PROMPT=0")
+	cmd.Env = append(append(os.Environ(), "LC_ALL=C", "GIT_TERMINAL_PROMPT=0"), r.Env...)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &stdout, &stderr
 	if err := cmd.Run(); err != nil {
