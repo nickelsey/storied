@@ -16,6 +16,9 @@
     Object.keys(links).forEach(function (k) {
       links[k].classList.toggle("current", k === id);
     });
+    sections.forEach(function (s) {
+      s.classList.toggle("current", s.id === id);
+    });
   }
   document.addEventListener("keydown", function (e) {
     if (e.target.closest("input, textarea, select") || e.metaKey || e.ctrlKey || e.altKey) return;

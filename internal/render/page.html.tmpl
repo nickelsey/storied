@@ -8,32 +8,18 @@
 <style>{{.CSS}}</style>
 </head>
 <body>
-<nav class="outline" aria-label="Story outline">
-<p class="outline-title">Story</p>
-<ol>
-{{- range .Sections}}
-<li><a href="#s-{{.ID}}"><span class="o-title">{{.Title}}</span>
-<span class="o-meta">{{if .Risk}}<span class="risk risk-{{.Risk}}">{{.Risk}}</span> · {{end}}{{.Author}} · {{if .Shown}}{{.Shown}} {{if eq .Shown 1}}line{{else}}lines{{end}}{{else}}no code{{end}}</span>
-{{- template "bar" .Coverage}}</a></li>
-{{- end}}
-{{- if .Uncovered}}
-<li><a href="#uncovered"><span class="o-title">Unreviewed changes</span>
-<span class="o-meta">{{.Coverage.Uncovered}} {{if eq .Coverage.Uncovered 1}}line{{else}}lines{{end}}</span></a></li>
-{{- end}}
-{{- if .Agent}}
-<li><a href="#agent"><span class="o-title">Notes for review agents</span></a></li>
-{{- end}}
-</ol>
-<p class="keys"><kbd>j</kbd> <kbd>k</kbd> next and previous section</p>
-</nav>
 <main>
-<header class="top">
+<header class="row top">
+<div class="story">
 <h1>{{.Title}}</h1>
 <p class="meta">
 {{- if .PRURL}}<a href="{{.PRURL}}">{{.Repo}}#{{.PR}}</a> · {{else if .Repo}}{{.Repo}} · {{end -}}
 <code>{{.Base}}..{{.Head}}</code> · {{.Files}} {{if eq .Files 1}}file{{else}}files{{end}} · {{.Coverage.Total}} changed {{if eq .Coverage.Total 1}}line{{else}}lines{{end}}</p>
 {{- if .BundleHead}}
 <p class="flag">This story was written for <code>{{.BundleHead}}</code>. The diff below ends at <code>{{.Head}}</code>, so parts of the story may be out of date.</p>
+{{- end}}
+{{- if .Preamble}}
+<div class="prose">{{.Preamble}}</div>
 {{- end}}
 <div class="coverage">
 {{- template "bar" .Coverage}}
@@ -53,12 +39,29 @@
 </ul>
 </details>
 {{- end}}
-{{- if .Preamble}}
-<div class="prose">{{.Preamble}}</div>
+</div>
+<nav class="code outline" aria-label="Story outline">
+<p class="outline-title">Story</p>
+<ol>
+{{- range .Sections}}
+<li><a href="#s-{{.ID}}"><span class="o-title">{{.Title}}</span>
+<span class="o-meta">{{if .Risk}}<span class="risk risk-{{.Risk}}">{{.Risk}}</span> · {{end}}{{.Author}} · {{if .Shown}}{{.Shown}} {{if eq .Shown 1}}line{{else}}lines{{end}}{{else}}no code{{end}}</span>
+{{- template "bar" .Coverage}}</a></li>
 {{- end}}
+{{- if .Uncovered}}
+<li><a href="#uncovered"><span class="o-title">Unreviewed changes</span>
+<span class="o-meta">{{.Coverage.Uncovered}} {{if eq .Coverage.Uncovered 1}}line{{else}}lines{{end}}</span></a></li>
+{{- end}}
+{{- if .Agent}}
+<li><a href="#agent"><span class="o-title">Notes for review agents</span></a></li>
+{{- end}}
+</ol>
+<p class="keys"><kbd>j</kbd> <kbd>k</kbd> next and previous section</p>
+</nav>
 </header>
 {{- range .Sections}}
-<section class="story-section" id="s-{{.ID}}">
+<section class="row story-section" id="s-{{.ID}}">
+<div class="story"><div class="pin">
 <h2>{{.Title}}</h2>
 <p class="tags"><span class="tag author-{{.Author}}">{{if eq .Author "agent"}}written by an agent{{else}}written by a person{{end}}</span>
 {{- if .Risk}} <span class="tag risk risk-{{.Risk}}">{{.Risk}} risk</span>{{end}}</p>
@@ -71,21 +74,30 @@
 {{- range .Artifacts}}
 {{template "artifact" .}}
 {{- end}}
-{{- range .Files}}
-{{template "file" .}}
-{{- end}}
 {{- if .Elsewhere}}
 <p class="note">{{.Elsewhere}} more changed {{if eq .Elsewhere 1}}line{{else}}lines{{end}} this section claims {{if eq .Elsewhere 1}}is{{else}}are{{end}} shown under a section with a more specific anchor.</p>
 {{- end}}
+</div></div>
+<div class="code">
+{{- range .Files}}
+{{template "file" .}}
+{{- else}}
+<p class="note empty">This section points at no code.</p>
+{{- end}}
+</div>
 </section>
 {{- end}}
 {{- if .Uncovered}}
-<section class="story-section uncovered" id="uncovered">
+<section class="row story-section uncovered" id="uncovered">
+<div class="story"><div class="pin">
 <h2>Unreviewed changes</h2>
 <p class="note">No section of the story refers to these changes.</p>
+</div></div>
+<div class="code">
 {{- range .Uncovered}}
 {{template "file" .}}
 {{- end}}
+</div>
 </section>
 {{- end}}
 {{- if .Agent}}

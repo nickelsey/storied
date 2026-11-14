@@ -8,7 +8,33 @@
 <style></style>
 </head>
 <body>
-<nav class="outline" aria-label="Story outline">
+<main>
+<header class="row top">
+<div class="story">
+<h1>Switch mesh export to watertight repair pass</h1>
+<p class="meta"><a href="https://github.com/org/cad-integration/pull/482">org/cad-integration#482</a> · <code>4693b1278..7bc5c47b9</code> · 10 files · 37 changed lines</p>
+<div class="prose"><p>Start with the repair pass; the rest follows from it.</p>
+</div>
+<div class="coverage">
+<span class="bar" role="img" aria-label="14 specific, 13 broad, 3 skim, 7 uncovered"><span class="c-specific" style="width: 37.8%"></span><span class="c-broad" style="width: 35.1%"></span><span class="c-skim" style="width: 8.1%"></span><span class="c-uncovered" style="width: 18.9%"></span></span>
+<ul class="legend">
+<li><span class="swatch c-specific"></span>14 specific</li>
+<li><span class="swatch c-broad"></span>13 broad</li>
+<li><span class="swatch c-skim"></span>3 skim</li>
+<li><span class="swatch c-uncovered"></span>7 uncovered</li>
+</ul>
+</div>
+<details class="warnings">
+<summary>4 warnings from storied lint</summary>
+<ul>
+<li>story.md:17: anchor path=&#34;plugins/blender/export.py&#34; symbol=&#34;export_mesh&#34; claims nothing: symbol anchors are not resolved by this version yet</li>
+<li>story.md:33: section tests has anchors but no prose</li>
+<li>story.md:37: stale anchor path=&#34;core/mesh/gone.py&#34;: core/mesh/gone.py is not changed in this diff</li>
+<li>7 of 37 changed lines are not covered by the story</li>
+</ul>
+</details>
+</div>
+<nav class="code outline" aria-label="Story outline">
 <p class="outline-title">Story</p>
 <ol>
 <li><a href="#s-why"><span class="o-title">Why</span>
@@ -28,39 +54,21 @@
 </ol>
 <p class="keys"><kbd>j</kbd> <kbd>k</kbd> next and previous section</p>
 </nav>
-<main>
-<header class="top">
-<h1>Switch mesh export to watertight repair pass</h1>
-<p class="meta"><a href="https://github.com/org/cad-integration/pull/482">org/cad-integration#482</a> · <code>4693b1278..7bc5c47b9</code> · 10 files · 37 changed lines</p>
-<div class="coverage">
-<span class="bar" role="img" aria-label="14 specific, 13 broad, 3 skim, 7 uncovered"><span class="c-specific" style="width: 37.8%"></span><span class="c-broad" style="width: 35.1%"></span><span class="c-skim" style="width: 8.1%"></span><span class="c-uncovered" style="width: 18.9%"></span></span>
-<ul class="legend">
-<li><span class="swatch c-specific"></span>14 specific</li>
-<li><span class="swatch c-broad"></span>13 broad</li>
-<li><span class="swatch c-skim"></span>3 skim</li>
-<li><span class="swatch c-uncovered"></span>7 uncovered</li>
-</ul>
-</div>
-<details class="warnings">
-<summary>4 warnings from storied lint</summary>
-<ul>
-<li>story.md:17: anchor path=&#34;plugins/blender/export.py&#34; symbol=&#34;export_mesh&#34; claims nothing: symbol anchors are not resolved by this version yet</li>
-<li>story.md:33: section tests has anchors but no prose</li>
-<li>story.md:37: stale anchor path=&#34;core/mesh/gone.py&#34;: core/mesh/gone.py is not changed in this diff</li>
-<li>7 of 37 changed lines are not covered by the story</li>
-</ul>
-</details>
-<div class="prose"><p>Start with the repair pass; the rest follows from it.</p>
-</div>
 </header>
-<section class="story-section" id="s-why">
+<section class="row story-section" id="s-why">
+<div class="story"><div class="pin">
 <h2>Why</h2>
 <p class="tags"><span class="tag author-human">written by a person</span> <span class="tag risk risk-medium">medium risk</span></p>
 <div class="prose"><p>Exports from the Blender plugin sometimes produce <strong>non-manifold</strong> meshes.
 See <a href="https://example.com/issues/12">the issue</a> and <!-- raw HTML omitted -->this raw HTML<!-- raw HTML omitted -->.</p>
 </div>
+</div></div>
+<div class="code">
+<p class="note empty">This section points at no code.</p>
+</div>
 </section>
-<section class="story-section" id="s-repair-pass">
+<section class="row story-section" id="s-repair-pass">
+<div class="story"><div class="pin">
 <h2>Repair pass in the exporter</h2>
 <p class="tags"><span class="tag author-agent">written by an agent</span> <span class="tag risk risk-high">high risk</span></p>
 <div class="prose"><p>The exporter now calls <code>repair_watertight</code> before writing:</p>
@@ -87,6 +95,8 @@ See <a href="https://example.com/issues/12">the issue</a> and <!-- raw HTML omit
 <p class="placeholder">A vega-lite artifact cannot be shown on a static page, and the bundle has no fallback image.</p>
 <figcaption><span class="a-id">drag-chart</span> · vega-lite · <span class="prov prov-gpu-job">from GPU job slurm-88121</span> · <span class="unverified">source not verified</span></figcaption>
 </figure>
+</div></div>
+<div class="code">
 
 <details class="file" open>
 <summary><span class="path">core/mesh/repair.py</span>
@@ -132,12 +142,17 @@ See <a href="https://example.com/issues/12">the issue</a> and <!-- raw HTML omit
 </tbody>
 </table>
 </details>
+</div>
 </section>
-<section class="story-section" id="s-weld">
+<section class="row story-section" id="s-weld">
+<div class="story"><div class="pin">
 <h2>Welding keeps vertex order</h2>
 <p class="tags"><span class="tag author-human">written by a person</span> <span class="tag risk risk-medium">medium risk</span></p>
 <div class="prose"><p><code>weld</code> used to return sorted, rounded copies.</p>
 </div>
+<p class="note">8 more changed lines this section claims are shown under a section with a more specific anchor.</p>
+</div></div>
+<div class="code">
 
 <details class="file" open>
 <summary><span class="path">core/mesh/legacy.py</span>
@@ -177,9 +192,10 @@ See <a href="https://example.com/issues/12">the issue</a> and <!-- raw HTML omit
 </tbody>
 </table>
 </details>
-<p class="note">8 more changed lines this section claims are shown under a section with a more specific anchor.</p>
+</div>
 </section>
-<section class="story-section" id="s-tests">
+<section class="row story-section" id="s-tests">
+<div class="story"><div class="pin">
 <h2>Tests and fixtures</h2>
 <p class="tags"><span class="tag author-agent">written by an agent</span> <span class="tag risk risk-low">low risk</span></p>
 <p class="flag">Stale anchor <code>path=&#34;core/mesh/gone.py&#34;</code>: core/mesh/gone.py is not changed in this diff.</p>
@@ -189,6 +205,8 @@ See <a href="https://example.com/issues/12">the issue</a> and <!-- raw HTML omit
 </pre>
 <figcaption><span class="a-id">export-tests</span> · log · <span class="prov prov-reviewer-agent">from a review agent, pytest tests/export -q</span> · <span class="unverified">source not verified</span></figcaption>
 </figure>
+</div></div>
+<div class="code">
 
 <details class="file">
 <summary><span class="path">deps.lock</span>
@@ -235,10 +253,14 @@ See <a href="https://example.com/issues/12">the issue</a> and <!-- raw HTML omit
 </tbody>
 </table>
 </details>
+</div>
 </section>
-<section class="story-section uncovered" id="uncovered">
+<section class="row story-section uncovered" id="uncovered">
+<div class="story"><div class="pin">
 <h2>Unreviewed changes</h2>
 <p class="note">No section of the story refers to these changes.</p>
+</div></div>
+<div class="code">
 
 <details class="file" open>
 <summary><span class="path">README.md</span>
@@ -290,6 +312,7 @@ See <a href="https://example.com/issues/12">the issue</a> and <!-- raw HTML omit
 <p class="f-link"><a href="https://github.com/org/cad-integration/pull/482/files#diff-4e8ad9b72ab8c00d618830a19490036b466bd83f51d5bb531b707a685765272e">Open this file in the PR</a></p>
 <p class="note">Mode changed from 100644 to 100755.</p>
 </details>
+</div>
 </section>
 <section class="story-section" id="agent">
 <details class="agent">
