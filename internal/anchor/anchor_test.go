@@ -3,6 +3,8 @@ package anchor_test
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -69,6 +71,7 @@ func TestResolveFixtureStory(t *testing.T) {
 				"core/mesh/repair.py:+25 core/mesh/repair.py:+26 core/mesh/repair.py:+27 core/mesh/repair.py:+28"},
 			{anchor.Exact, "plugins/blender/export.py:+2 plugins/blender/export.py:-4 plugins/blender/export.py:+5 " +
 				"plugins/blender/export.py:+7 plugins/blender/export.py:+8"},
+			{anchor.Exact, "plugins/blender/export.py:+7 plugins/blender/export.py:+8"},
 			{anchor.Unsupported, ""},
 		},
 		{ // weld
@@ -122,7 +125,7 @@ func TestResolveFixtureStory(t *testing.T) {
 		t.Errorf("uncovered:\n %s\nwant\n %s", got, want)
 	}
 
-	if got, want := r.Coverage(), (anchor.Coverage{Total: 37, Specific: 12, Broad: 15, Skim: 3, Uncovered: 7}); got != want {
+	if got, want := r.Coverage(), (anchor.Coverage{Total: 37, Specific: 14, Broad: 13, Skim: 3, Uncovered: 7}); got != want {
 		t.Errorf("Coverage = %+v, want %+v", got, want)
 	}
 	var sum anchor.Coverage
@@ -179,7 +182,11 @@ func TestResolveEdgeCases(t *testing.T) {
 		{"lines never claim a whole-file unit", `::anchor{path="logo.png" lines="1-9"}`, anchor.Stale, "", false},
 		{"glob does not cross directories with one star", `::anchor{glob="*.py"}`, anchor.Stale, "", false},
 		{"glob alternatives", `::anchor{glob="{README.md,deps.lock}"}`, anchor.Exact, "README.md:-3 README.md:+3 deps.lock:-1 deps.lock:+1", false},
-		{"content is not resolved yet", `::anchor{content="1111111111111111111111111111111111111111" path="README.md"}`, anchor.Unsupported, "", false},
+		{"hunk by short id", `::anchor{hunk="4cadd9b"}`, anchor.Exact,
+			"core/mesh/repair.py:-8 core/mesh/repair.py:-9 core/mesh/repair.py:+8 core/mesh/repair.py:+9 core/mesh/repair.py:+10", false},
+		{"hunk by full id", `::anchor{hunk="108c261b6c6b1601a2852b2c63726104efb5dfd4d9fcd79ba7600601a123c73a"}`, anchor.Exact, "plugins/blender/export.py:+2", false},
+		{"hunk for a whole-file change", `::anchor{hunk="36ad9b6c"}`, anchor.Exact, "docs/new-name.md", false},
+		{"hunk that is not in the diff", `::anchor{hunk="0000000"}`, anchor.Stale, "", false},
 		{"commit is not resolved yet", `::anchor{commit="1111111111111111111111111111111111111111"}`, anchor.Unsupported, "", false},
 	}
 	for _, tt := range tests {
@@ -252,5 +259,136 @@ func TestUnitsFollowDiffOrder(t *testing.T) {
 	}
 	if !reflect.DeepEqual(files, want) {
 		t.Errorf("unit files = %v, want each file once in order %v", files, want)
+	}
+}
+
+func TestBlocks(t *testing.T) {
+	f := fixture.New(t)
+	r, _ := resolve(t, f, head+"## A {#a author=human}\n", true)
+
+	// Every unit is in exactly one block, and a block is one unbroken run.
+	seen := make([]int, len(r.Units))
+	for bi, b := range r.Blocks {
+		for i, u := range b.Units {
+			seen[u]++
+			if r.BlockOf[u] != bi {
+				t.Errorf("BlockOf[%d] = %d, want %d", u, r.BlockOf[u], bi)
+			}
+			if unit := r.Units[u]; unit.File != b.File || unit.Hunk != b.Hunk || (b.Hunk >= 0 && unit.Line != b.First+i) {
+				t.Errorf("block %d: unit %d = %+v does not continue the run from line %d", bi, u, unit, b.First)
+			}
+		}
+	}
+	for u, n := range seen {
+		if n != 1 {
+			t.Errorf("unit %s is in %d blocks", describe(r, u), n)
+		}
+	}
+	// export.py has one git hunk with three separate changes in it.
+	var export []string
+	for bi, b := range r.Blocks {
+		if r.Diff.Files[b.File].Path() == "plugins/blender/export.py" {
+			export = append(export, r.ShortID[bi]+"="+describeAll(r, b.Units))
+		}
+	}
+	want := "108c261=plugins/blender/export.py:+2 | 3502f0c=plugins/blender/export.py:-4 plugins/blender/export.py:+5 | " +
+		"b2af964=plugins/blender/export.py:+7 plugins/blender/export.py:+8"
+	if got := strings.Join(export, " | "); got != want {
+		t.Errorf("export.py blocks:\n %s\nwant:\n %s", got, want)
+	}
+}
+
+// ids maps "path:first unit" to block id for a diff of base..head.
+func blockIDs(t *testing.T, f *fixture.Fixture, base, headRev string) map[string]string {
+	t.Helper()
+	d, err := diff.Compute(context.Background(), gitx.Repo{Dir: f.Repo.Dir}, base, headRev)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s, _ := bundle.ParseStory([]byte(head + "## A {#a author=human}\n"))
+	r := anchor.Resolve(d, s, d.Base, d.Head)
+	out := map[string]string{}
+	for _, b := range r.Blocks {
+		out[describe(r, b.Units[0])] = b.ID
+	}
+	return out
+}
+
+func TestBlockIDsSurviveUnrelatedEdits(t *testing.T) {
+	f := fixture.New(t)
+	before := blockIDs(t, f, f.Base, f.Head)
+
+	// Push lines down in repair.py above both blocks, edit one block of
+	// export.py, and rebase the lot onto a moved main.
+	f.Repo.Write("core/mesh/repair.py", "# Copyright\n# header\n"+read(t, f, "core/mesh/repair.py"))
+	f.Repo.Write("plugins/blender/export.py", strings.Replace(read(t, f, "plugins/blender/export.py"), "if repair:", "if repair is True:", 1))
+	f.Repo.Commit("header and tweak")
+	f.Repo.Git("checkout", "-q", "main")
+	f.Repo.Write("unrelated.txt", "x\n")
+	f.Repo.Commit("main moves")
+	f.Repo.Git("checkout", "-q", "repair")
+	f.Repo.Git("rebase", "-q", "main")
+	after := blockIDs(t, f, f.Repo.Git("merge-base", "main", "HEAD"), "HEAD")
+
+	same := map[string]string{ // before -> after: the same block, at new line numbers
+		"core/mesh/repair.py:-8":       "core/mesh/repair.py:-8",
+		"core/mesh/repair.py:+21":      "core/mesh/repair.py:+23",
+		"plugins/blender/export.py:+2": "plugins/blender/export.py:+2",
+		"README.md:-3":                 "README.md:-3",
+		"docs/new-name.md":             "docs/new-name.md",
+	}
+	for was, now := range same {
+		if before[was] == "" || before[was] != after[now] {
+			t.Errorf("block %s: id %.8s before, %.8s after at %s; want the same", was, before[was], after[now], now)
+		}
+	}
+	if b, a := before["plugins/blender/export.py:+7"], after["plugins/blender/export.py:+7"]; b == "" || a == "" || a == b {
+		t.Errorf("edited block kept its id %.8s (after: %.8s)", b, a)
+	}
+}
+
+func TestBlockIDsOfRepeatedChange(t *testing.T) {
+	f := fixture.New(t)
+	line := strings.Repeat("x = 1\n", 1)
+	gap := "a\nb\nc\nd\ne\nf\ng\nh\n"
+	f.Repo.Write("twice.py", gap+gap)
+	f.Repo.Write("other/twice.py", gap)
+	base := f.Repo.Commit("before")
+	f.Repo.Write("twice.py", line+gap+line+gap)
+	f.Repo.Write("other/twice.py", line+gap)
+	f.Repo.Commit("after")
+	ids := blockIDs(t, f, base, "HEAD")
+	a, b, c := ids["twice.py:+1"], ids["twice.py:+10"], ids["other/twice.py:+1"]
+	if a == "" || b == "" || c == "" || a == b || a == c || b == c {
+		t.Errorf("ids %.8s %.8s %.8s; want three different ones for the same change in three places", a, b, c)
+	}
+}
+
+func read(t *testing.T, f *fixture.Fixture, path string) string {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join(f.Repo.Dir, filepath.FromSlash(path)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(data)
+}
+
+func TestAmbiguousHunkPrefix(t *testing.T) {
+	// Two blocks sharing a seven-character prefix cannot be arranged, so
+	// check the rule on ids directly: a prefix of every id is ambiguous.
+	f := fixture.New(t)
+	r, s := resolve(t, f, head+"## A {#a author=human}\n::anchor{hunk=\"b2af964\"}\n", true)
+	if c := r.Sections[0].Claims[0]; c.State != anchor.Exact || s.Sections[0].Anchors[0].Hunk != "b2af964" {
+		t.Fatalf("claim = %+v", c)
+	}
+	for i, id := range r.ShortID {
+		if len(id) < anchor.MinIDLength || !strings.HasPrefix(r.Blocks[i].ID, id) {
+			t.Errorf("short id %q of block %d", id, i)
+		}
+		for j, other := range r.Blocks {
+			if j != i && strings.HasPrefix(other.ID, id) {
+				t.Errorf("short id %q of block %d also matches block %d", id, i, j)
+			}
+		}
 	}
 }

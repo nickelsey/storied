@@ -27,7 +27,7 @@ const (
 	Uncovered Class = iota // no section claims it
 	Skim                   // claimed only by skim globs
 	Broad                  // claimed only by path or glob anchors
-	Specific               // claimed by a lines, content, symbol or commit anchor
+	Specific               // claimed by a lines, hunk, symbol or commit anchor
 )
 
 func (c Class) String() string {
@@ -68,6 +68,9 @@ type Section struct {
 type Resolution struct {
 	Diff     *diff.Diff
 	Units    []Unit
+	Blocks   []Block   // the units grouped into change blocks, in diff order
+	ShortID  []string  // per block: its id cut to the shortest unique prefix
+	BlockOf  []int     // per unit: index of its block
 	Sections []Section // parallel to the story's sections
 	Owner    []int     // per unit: index of its primary section, or -1
 	Class    []Class   // per unit
@@ -79,7 +82,7 @@ func rank(a bundle.Anchor) int {
 	switch a.Kind {
 	case bundle.AnchorLines:
 		return 6
-	case bundle.AnchorContent:
+	case bundle.AnchorHunk:
 		return 5
 	case bundle.AnchorSymbol:
 		return 4
@@ -130,6 +133,9 @@ func Resolve(d *diff.Diff, story *bundle.Story, bundleBase, bundleHead string) *
 			r.Units = append(r.Units, Unit{File: fi, Hunk: -1, Line: -1})
 		}
 	}
+
+	r.Blocks, r.BlockOf = blocks(d, r.Units, byFile)
+	r.ShortID = shortIDs(r.Blocks)
 
 	r.Owner = make([]int, len(r.Units))
 	r.Class = make([]Class, len(r.Units))
@@ -229,6 +235,16 @@ func (r *Resolution) resolve(a bundle.Anchor, byFile [][]int, current sides) Cla
 		}
 		if len(c.Units) == 0 {
 			return stale("no changed line on the %s side of %s within %d-%d", side, a.Path, a.Lines.Start, a.Lines.End)
+		}
+
+	case bundle.AnchorHunk:
+		switch found := r.findBlocks(a.Hunk); len(found) {
+		case 0:
+			return stale("no change block has the id %s; the code it pointed at was edited or is no longer part of the diff", a.Hunk)
+		case 1:
+			c.Units = r.Blocks[found[0]].Units
+		default:
+			return stale("%d change blocks have an id starting with %s; write more of the id", len(found), a.Hunk)
 		}
 
 	default:

@@ -15,14 +15,14 @@
 <span class="o-meta"><span class="risk risk-medium">medium</span> · human · no code</span></a></li>
 <li><a href="#s-repair-pass"><span class="o-title">Repair pass in the exporter</span>
 <span class="o-meta"><span class="risk risk-high">high</span> · agent · 13 lines</span>
-<span class="bar" role="img" aria-label="8 specific, 5 broad"><span class="c-specific" style="width: 61.5%"></span><span class="c-broad" style="width: 38.4%"></span></span></a></li>
+<span class="bar" role="img" aria-label="10 specific, 3 broad"><span class="c-specific" style="width: 76.9%"></span><span class="c-broad" style="width: 23%"></span></span></a></li>
 <li><a href="#s-weld"><span class="o-title">Welding keeps vertex order</span>
 <span class="o-meta"><span class="risk risk-medium">medium</span> · human · 9 lines</span>
 <span class="bar" role="img" aria-label="4 specific, 5 broad"><span class="c-specific" style="width: 44.4%"></span><span class="c-broad" style="width: 55.5%"></span></span></a></li>
 <li><a href="#s-tests"><span class="o-title">Tests and fixtures</span>
 <span class="o-meta"><span class="risk risk-low">low</span> · agent · 8 lines</span>
 <span class="bar" role="img" aria-label="5 broad, 3 skim"><span class="c-broad" style="width: 62.5%"></span><span class="c-skim" style="width: 37.5%"></span></span></a></li>
-<li><a href="#uncovered"><span class="o-title">Not covered by the story</span>
+<li><a href="#uncovered"><span class="o-title">Unreviewed changes</span>
 <span class="o-meta">7 lines</span></a></li>
 <li><a href="#agent"><span class="o-title">Notes for review agents</span></a></li>
 </ol>
@@ -33,10 +33,10 @@
 <h1>Switch mesh export to watertight repair pass</h1>
 <p class="meta"><a href="https://github.com/org/cad-integration/pull/482">org/cad-integration#482</a> · <code>4693b1278..7bc5c47b9</code> · 10 files · 37 changed lines</p>
 <div class="coverage">
-<span class="bar" role="img" aria-label="12 specific, 15 broad, 3 skim, 7 uncovered"><span class="c-specific" style="width: 32.4%"></span><span class="c-broad" style="width: 40.5%"></span><span class="c-skim" style="width: 8.1%"></span><span class="c-uncovered" style="width: 18.9%"></span></span>
+<span class="bar" role="img" aria-label="14 specific, 13 broad, 3 skim, 7 uncovered"><span class="c-specific" style="width: 37.8%"></span><span class="c-broad" style="width: 35.1%"></span><span class="c-skim" style="width: 8.1%"></span><span class="c-uncovered" style="width: 18.9%"></span></span>
 <ul class="legend">
-<li><span class="swatch c-specific"></span>12 specific</li>
-<li><span class="swatch c-broad"></span>15 broad</li>
+<li><span class="swatch c-specific"></span>14 specific</li>
+<li><span class="swatch c-broad"></span>13 broad</li>
 <li><span class="swatch c-skim"></span>3 skim</li>
 <li><span class="swatch c-uncovered"></span>7 uncovered</li>
 </ul>
@@ -44,9 +44,9 @@
 <details class="warnings">
 <summary>4 warnings from storied lint</summary>
 <ul>
-<li>story.md:16: anchor path=&#34;plugins/blender/export.py&#34; symbol=&#34;export_mesh&#34; claims nothing: symbol anchors are not resolved by this version yet</li>
-<li>story.md:32: section tests has anchors but no prose</li>
-<li>story.md:36: stale anchor path=&#34;core/mesh/gone.py&#34;: core/mesh/gone.py is not changed in this diff</li>
+<li>story.md:17: anchor path=&#34;plugins/blender/export.py&#34; symbol=&#34;export_mesh&#34; claims nothing: symbol anchors are not resolved by this version yet</li>
+<li>story.md:33: section tests has anchors but no prose</li>
+<li>story.md:37: stale anchor path=&#34;core/mesh/gone.py&#34;: core/mesh/gone.py is not changed in this diff</li>
 <li>7 of 37 changed lines are not covered by the story</li>
 </ul>
 </details>
@@ -237,8 +237,8 @@ See <a href="https://example.com/issues/12">the issue</a> and <!-- raw HTML omit
 </details>
 </section>
 <section class="story-section uncovered" id="uncovered">
-<h2>Not covered by the story</h2>
-<p class="note">No section explains these changes.</p>
+<h2>Unreviewed changes</h2>
+<p class="note">No section of the story refers to these changes.</p>
 
 <details class="file" open>
 <summary><span class="path">README.md</span>

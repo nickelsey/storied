@@ -141,14 +141,32 @@ func TestInitAndDraftCommands(t *testing.T) {
 		t.Errorf("init: exit %d, stderr: %s", code, errOut)
 	}
 
-	code, out, _ = runCLI("draft", repo, "--dry-run")
-	if code != ExitOK || !strings.Contains(out, "dry run: would write 8 new sections; nothing written") {
-		t.Errorf("draft --dry-run: exit %d\n%s", code, out)
-	}
+	// On its own, draft lists the blocks and leaves the story alone.
 	code, out, _ = runCLI("draft", repo)
 	for _, want := range []string{
 		"  kept  why  (0 files, 0 lines)\n",
+		"13 of 13 change blocks not in the story yet:\n",
+		"  4cadd9b  core/mesh/repair.py:8             +3 -2       def weld(vertices, tol=1e-6):\n",
+		"  36ad9b6  docs/new-name.md                  whole file\n",
+		`attach each to the section that explains it with ::anchor{hunk="<id>"}`,
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("draft output lacks %q:\n%s", want, out)
+		}
+	}
+	if code != ExitOK || strings.Contains(out, "new section") {
+		t.Errorf("draft: exit %d\n%s", code, out)
+	}
+
+	code, out, _ = runCLI("draft", repo, "--by-file", "--dry-run")
+	if code != ExitOK || !strings.Contains(out, "dry run: would write 8 new sections; nothing written") {
+		t.Errorf("draft --by-file --dry-run: exit %d\n%s", code, out)
+	}
+	code, out, _ = runCLI("draft", repo, "--by-file")
+	for _, want := range []string{
+		"  kept  why  (0 files, 0 lines)\n",
 		"  new   core-mesh  (2 files, 19 lines)  needs prose\n",
+		"every one of the 13 change blocks is in the story\n",
 		"wrote 8 new sections to ",
 		"next: write the prose for 8 sections, then run storied lint\n",
 	} {

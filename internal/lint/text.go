@@ -46,15 +46,9 @@ func (r *Report) WriteText(w io.Writer) error {
 	}
 	tw.Flush()
 
-	if c.Uncovered > 0 {
-		b.WriteString("\nNot covered\n")
-		tw = tabwriter.NewWriter(&b, 0, 0, 2, ' ', 0)
-		for _, f := range r.Files {
-			if f.Uncovered > 0 {
-				fmt.Fprintf(tw, "  %s\t%d of %d\n", f.Path, f.Uncovered, f.Total)
-			}
-		}
-		tw.Flush()
+	if len(r.Unreviewed) > 0 {
+		b.WriteString("\nNot in the story\n")
+		WriteBlocks(&b, r.Unreviewed)
 	}
 
 	b.WriteString("\n")
@@ -92,4 +86,31 @@ func percent(n, total int) string {
 		return "0%"
 	}
 	return fmt.Sprintf("%d%%", (n*100+total/2)/total)
+}
+
+// WriteBlocks lists change blocks one per line, with the id to anchor each.
+func WriteBlocks(w io.Writer, blocks []BlockReport) {
+	var buf strings.Builder
+	tw := tabwriter.NewWriter(&buf, 0, 0, 2, ' ', 0)
+	for _, b := range blocks {
+		where := b.Path
+		if b.Line > 0 {
+			where = fmt.Sprintf("%s:%d", b.Path, b.Line)
+		}
+		stat := "whole file"
+		if b.Added+b.Deleted > 0 {
+			stat = fmt.Sprintf("+%d -%d", b.Added, b.Deleted)
+		}
+		if b.Unclaimed > 0 && b.Unclaimed < b.Total {
+			stat += fmt.Sprintf(" (%d of %d lines unclaimed)", b.Unclaimed, b.Total)
+		}
+		fmt.Fprintf(tw, "  %s\t%s\t%s\t%s\n", b.ID, where, stat, b.Header)
+	}
+	tw.Flush()
+	// A block without a header leaves padding at the end of its line.
+	for _, l := range strings.SplitAfter(buf.String(), "\n") {
+		if l != "" {
+			fmt.Fprintln(w, strings.TrimRight(l, " \n"))
+		}
+	}
 }

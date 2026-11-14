@@ -55,24 +55,25 @@ type ArtifactRef struct {
 type AnchorKind string
 
 const (
-	AnchorPath    AnchorKind = "path"    // every changed line in a file
-	AnchorSymbol  AnchorKind = "symbol"  // changed lines inside a named symbol
-	AnchorGlob    AnchorKind = "glob"    // every changed line in matching files
-	AnchorLines   AnchorKind = "lines"   // an explicit line range
-	AnchorContent AnchorKind = "content" // a hunk identified by its patch-id
-	AnchorCommit  AnchorKind = "commit"  // a PR commit identified by its patch-id
+	AnchorPath   AnchorKind = "path"   // every changed line in a file
+	AnchorSymbol AnchorKind = "symbol" // changed lines inside a named symbol
+	AnchorGlob   AnchorKind = "glob"   // every changed line in matching files
+	AnchorLines  AnchorKind = "lines"  // an explicit line range
+	AnchorHunk   AnchorKind = "hunk"   // one change block, identified by a hash of its changed lines
+	AnchorCommit AnchorKind = "commit" // a PR commit identified by its patch-id
 )
 
 // Anchor is one ::anchor directive. Only the fields its Kind uses are set.
 type Anchor struct {
 	Kind    AnchorKind
-	Path    string    `json:",omitempty"` // path, symbol, lines, content
+	Path    string    `json:",omitempty"` // path, symbol, lines
 	Symbol  string    `json:",omitempty"`
 	Glob    string    `json:",omitempty"`
 	Skim    bool      `json:",omitempty"` // glob only: counts as covered, renders collapsed
 	Lines   LineRange `json:",omitzero"`
 	OldSide bool      `json:",omitempty"` // lines only: the range is in the base version
-	PatchID string    `json:",omitempty"` // content, commit
+	Hunk    string    `json:",omitempty"` // a change block id, or a prefix of one of at least 7 characters
+	PatchID string    `json:",omitempty"` // commit
 	Line    int
 }
 
@@ -93,6 +94,7 @@ var (
 	directiveRE   = regexp.MustCompile(`^::([a-z][a-z0-9-]*)\{(.*)\}[ \t]*$`)
 	lineRangeRE   = regexp.MustCompile(`^(\d+)(?:-(\d+))?$`)
 	patchIDRE     = regexp.MustCompile(`^[0-9a-f]{40}$`)
+	hunkIDRE      = regexp.MustCompile(`^[0-9a-f]{7,64}$`)
 	risks         = map[string]bool{"low": true, "medium": true, "high": true}
 )
 
@@ -333,7 +335,7 @@ var anchorForms = []struct {
 	needPath bool
 }{
 	{AnchorCommit, "commit", []string{"commit"}, false},
-	{AnchorContent, "content", []string{"content", "path"}, true},
+	{AnchorHunk, "hunk", []string{"hunk"}, false},
 	{AnchorGlob, "glob", []string{"glob", "skim"}, false},
 	{AnchorSymbol, "symbol", []string{"symbol", "path"}, true},
 	{AnchorLines, "lines", []string{"lines", "side", "path"}, true},
@@ -369,7 +371,7 @@ func parseAnchor(attrs map[string]attr, n int, c *collector) (Anchor, bool) {
 		}
 	}
 	if form < 0 {
-		fail("needs one of path, glob, content or commit")
+		fail("needs one of path, glob, hunk or commit")
 		return a, false
 	}
 	f := anchorForms[form]
@@ -424,10 +426,15 @@ func parseAnchor(attrs map[string]attr, n int, c *collector) (Anchor, bool) {
 		default:
 			fail("side %q must be old or new", side.Value)
 		}
-	case AnchorContent, AnchorCommit:
-		a.PatchID = attrs[f.selector].Value
+	case AnchorHunk:
+		a.Hunk = attrs["hunk"].Value
+		if !hunkIDRE.MatchString(a.Hunk) {
+			fail("hunk %q must be a change block id: 7 to 64 hex digits, as storied draft prints them", a.Hunk)
+		}
+	case AnchorCommit:
+		a.PatchID = attrs["commit"].Value
 		if !patchIDRE.MatchString(a.PatchID) {
-			fail("%s %q must be a 40-character patch-id", f.selector, a.PatchID)
+			fail("commit %q must be a 40-character patch-id", a.PatchID)
 		}
 	}
 	return a, ok

@@ -83,7 +83,7 @@ type command struct {
 func commands() []command {
 	return []command{
 		{"init", "author", "scaffold story.md, manifest.yaml and agent.md for the current branch", runInit},
-		{"draft", "author's agent", "group hunks into sections and write anchors", runDraft},
+		{"draft", "author's agent", "list the change blocks of the diff and which section explains each", runDraft},
 		{"lint", "author, CI", "validate the bundle, resolve anchors, report coverage and stale anchors", runLint},
 		{"render", "author, reviewer", "write one static HTML page of the diff in story order", runRender},
 		{"pack", "author", "bundle, checksum and publish the bundle for the PR", notImplemented},

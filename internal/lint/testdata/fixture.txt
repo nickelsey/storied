@@ -2,8 +2,8 @@ Switch mesh export to watertight repair pass
 4693b1278..7bc5c47b9, 10 files, 37 changed lines
 
 Coverage
-     specific  12  32%
-        broad  15  41%
+     specific  14  38%
+        broad  13  35%
          skim   3   8%
     uncovered   7  19%
 
@@ -15,16 +15,16 @@ Sections
   tests          agent  8 lines
     stale               path="core/mesh/gone.py"
 
-Not covered
-  README.md            2 of 2
-  core/mesh/legacy.py  2 of 6
-  docs/new-name.md     1 of 1
-  logo.png             1 of 1
-  tools/run.sh         1 of 1
+Not in the story
+  6fc9671  README.md:3            +1 -1
+  ca0fe3f  core/mesh/legacy.py:1  +0 -6 (2 of 6 lines unclaimed)
+  36ad9b6  docs/new-name.md       whole file
+  d79883c  logo.png               whole file
+  f66978a  tools/run.sh           whole file
 
-warning: story.md:16: anchor path="plugins/blender/export.py" symbol="export_mesh" claims nothing: symbol anchors are not resolved by this version yet
-warning: story.md:32: section tests has anchors but no prose
-warning: story.md:36: stale anchor path="core/mesh/gone.py": core/mesh/gone.py is not changed in this diff
+warning: story.md:17: anchor path="plugins/blender/export.py" symbol="export_mesh" claims nothing: symbol anchors are not resolved by this version yet
+warning: story.md:33: section tests has anchors but no prose
+warning: story.md:37: stale anchor path="core/mesh/gone.py": core/mesh/gone.py is not changed in this diff
 warning: 7 of 37 changed lines are not covered by the story
 
 0 errors, 4 warnings

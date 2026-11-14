@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -76,6 +77,58 @@ type FileReport struct {
 	anchor.Coverage
 }
 
+// BlockReport is one change block: the smallest piece of the diff a story
+// can point at, with the id to write in ::anchor{hunk="..."}.
+type BlockReport struct {
+	ID        string `json:"id"`
+	Path      string `json:"path"`
+	Line      int    `json:"line,omitempty"` // first changed line: in the new file, or in the old one for a pure deletion
+	Added     int    `json:"added"`
+	Deleted   int    `json:"deleted"`
+	Header    string `json:"header,omitempty"`    // the enclosing function, as git reports it
+	Unclaimed int    `json:"unclaimed,omitempty"` // changed lines no section claims
+	Total     int    `json:"total"`               // changed lines, or 1 for a whole-file change
+}
+
+var funcLineRE = regexp.MustCompile(`^[A-Za-z_$]`)
+
+// DescribeBlock reports block i of a resolution.
+func DescribeBlock(r *anchor.Resolution, i int) BlockReport {
+	b := r.Blocks[i]
+	f := r.Diff.Files[b.File]
+	br := BlockReport{ID: r.ShortID[i], Path: f.Path(), Total: len(b.Units)}
+	br.Added, br.Deleted = r.Stat(b)
+	for _, u := range b.Units {
+		if r.Owner[u] < 0 {
+			br.Unclaimed++
+		}
+	}
+	if b.Hunk >= 0 {
+		h := f.Hunks[b.Hunk]
+		// git's header names the function above the hunk's first line.
+		// A block further down may sit in a later function, so look for
+		// one in the hunk first, by git's own default rule: a line that
+		// starts with a letter, an underscore or a dollar sign.
+		br.Header = h.Header
+		for i := b.First - 1; i >= 0; i-- {
+			if l := h.Lines[i]; l.Kind != diff.Delete && funcLineRE.MatchString(l.Text) {
+				br.Header = strings.TrimRight(l.Text, " \t\r")
+				break
+			}
+		}
+		for _, l := range h.Lines[b.First : b.Last+1] {
+			if l.New > 0 {
+				br.Line = l.New
+				break
+			}
+		}
+		if br.Line == 0 {
+			br.Line = h.Lines[b.First].Old
+		}
+	}
+	return br
+}
+
 // Report is the outcome of a lint run. When Errors is not empty the bundle
 // is invalid and the other fields may be incomplete.
 type Report struct {
@@ -86,6 +139,7 @@ type Report struct {
 	Coverage   anchor.Coverage `json:"coverage"`
 	Sections   []SectionReport `json:"sections"`
 	Files      []FileReport    `json:"files"`
+	Unreviewed []BlockReport   `json:"unreviewed"` // blocks with lines no section claims
 	Errors     []Finding       `json:"errors"`
 	Warnings   []Finding       `json:"warnings"`
 }
@@ -126,7 +180,7 @@ func Run(ctx context.Context, opts Options) (*Result, error) {
 		return nil, err
 	}
 
-	rep := &Report{Sections: []SectionReport{}, Files: []FileReport{}, Errors: []Finding{}, Warnings: []Finding{}}
+	rep := &Report{Sections: []SectionReport{}, Files: []FileReport{}, Unreviewed: []BlockReport{}, Errors: []Finding{}, Warnings: []Finding{}}
 	res := &Result{Report: rep}
 
 	b, err := bundle.Load(bundleDir)
@@ -188,6 +242,11 @@ func Run(ctx context.Context, opts Options) (*Result, error) {
 			})
 		}
 		rep.Sections = append(rep.Sections, sr)
+	}
+	for i := range r.Blocks {
+		if br := DescribeBlock(r, i); br.Unclaimed > 0 {
+			rep.Unreviewed = append(rep.Unreviewed, br)
+		}
 	}
 	rep.Warnings = warnings(b, r, rep)
 	return res, nil
@@ -255,8 +314,8 @@ func Spec(a bundle.Anchor) string {
 	switch a.Kind {
 	case bundle.AnchorCommit:
 		add("commit", a.PatchID)
-	case bundle.AnchorContent:
-		add("content", a.PatchID)
+	case bundle.AnchorHunk:
+		add("hunk", a.Hunk)
 	case bundle.AnchorGlob:
 		add("glob", a.Glob)
 	}

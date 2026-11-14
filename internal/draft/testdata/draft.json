@@ -308,6 +308,185 @@
       ]
     }
   ],
+  "blocks": [
+    {
+      "id": "6fc9671",
+      "path": "README.md",
+      "line": 3,
+      "added": 1,
+      "deleted": 1,
+      "total": 2,
+      "section": "top-level",
+      "lines": [
+        "-Mesh tools.",
+        "+Mesh tools, with repair."
+      ]
+    },
+    {
+      "id": "ca0fe3f",
+      "path": "core/mesh/legacy.py",
+      "line": 1,
+      "added": 0,
+      "deleted": 6,
+      "total": 6,
+      "section": "core-mesh",
+      "lines": [
+        "-def close_mesh(mesh):",
+        "-    # Old single-pass repair.",
+        "-    mesh.fill()",
+        "-    return mesh",
+        "-",
+        "-LEGACY = True"
+      ]
+    },
+    {
+      "id": "4cadd9b",
+      "path": "core/mesh/repair.py",
+      "line": 8,
+      "added": 3,
+      "deleted": 2,
+      "header": "def weld(vertices, tol=1e-6):",
+      "total": 5,
+      "section": "core-mesh",
+      "lines": [
+        "-    keys = np.round(vertices / tol)",
+        "-    return np.unique(keys, axis=0) * tol",
+        "+    keys = np.round(vertices / tol).astype(np.int64)",
+        "+    _, index = np.unique(keys, axis=0, return_index=True)",
+        "+    return vertices[np.sort(index)]"
+      ]
+    },
+    {
+      "id": "d221e07",
+      "path": "core/mesh/repair.py",
+      "line": 21,
+      "added": 8,
+      "deleted": 0,
+      "header": "def is_watertight(mesh):",
+      "total": 8,
+      "section": "core-mesh",
+      "lines": [
+        "+",
+        "+",
+        "+def repair_watertight(mesh, tol=1e-6):",
+        "+    \"\"\"Weld, then fill holes, until the mesh is closed.\"\"\"",
+        "+    mesh.vertices = weld(mesh.vertices, tol)",
+        "+    if not is_watertight(mesh):",
+        "+        fill_holes(mesh)",
+        "+    return mesh"
+      ]
+    },
+    {
+      "id": "ad4526c",
+      "path": "deps.lock",
+      "line": 1,
+      "added": 1,
+      "deleted": 1,
+      "total": 2,
+      "section": "generated",
+      "lines": [
+        "-numpy==2.1.0",
+        "+numpy==2.2.0"
+      ]
+    },
+    {
+      "id": "36ad9b6",
+      "path": "docs/new-name.md",
+      "added": 0,
+      "deleted": 0,
+      "total": 1,
+      "section": "docs-new-name-md",
+      "lines": []
+    },
+    {
+      "id": "d79883c",
+      "path": "logo.png",
+      "added": 0,
+      "deleted": 0,
+      "total": 1,
+      "section": "top-level",
+      "lines": []
+    },
+    {
+      "id": "108c261",
+      "path": "plugins/blender/export.py",
+      "line": 2,
+      "added": 1,
+      "deleted": 0,
+      "header": "from core.mesh import io",
+      "total": 1,
+      "section": "plugins-blender-export-py",
+      "lines": [
+        "+from core.mesh.repair import repair_watertight"
+      ]
+    },
+    {
+      "id": "3502f0c",
+      "path": "plugins/blender/export.py",
+      "line": 5,
+      "added": 1,
+      "deleted": 1,
+      "header": "from core.mesh.repair import repair_watertight",
+      "total": 2,
+      "section": "plugins-blender-export-py",
+      "lines": [
+        "-def export_mesh(obj, path):",
+        "+def export_mesh(obj, path, repair=True):"
+      ]
+    },
+    {
+      "id": "b2af964",
+      "path": "plugins/blender/export.py",
+      "line": 7,
+      "added": 2,
+      "deleted": 0,
+      "header": "def export_mesh(obj, path, repair=True):",
+      "total": 2,
+      "section": "plugins-blender-export-py",
+      "lines": [
+        "+    if repair:",
+        "+        mesh = repair_watertight(mesh)  # \u003ccloses\u003e holes \u0026 welds"
+      ]
+    },
+    {
+      "id": "77cc1f8",
+      "path": "tests/export/test_repair.py",
+      "line": 1,
+      "added": 5,
+      "deleted": 0,
+      "total": 5,
+      "section": "tests-core-mesh-repair-py",
+      "lines": [
+        "+from core.mesh.repair import repair_watertight",
+        "+",
+        "+",
+        "+def test_repair_closes_cube(open_cube):",
+        "+    assert repair_watertight(open_cube).boundary_loops() == []"
+      ]
+    },
+    {
+      "id": "c71686d",
+      "path": "tests/fixtures/meshes/cube.obj",
+      "line": 3,
+      "added": 1,
+      "deleted": 0,
+      "header": "v 1 0 0",
+      "total": 1,
+      "section": "tests-fixtures-meshes",
+      "lines": [
+        "+v 1 1 0"
+      ]
+    },
+    {
+      "id": "f66978a",
+      "path": "tools/run.sh",
+      "added": 0,
+      "deleted": 0,
+      "total": 1,
+      "section": "tools-run-sh",
+      "lines": []
+    }
+  ],
   "attention": [],
   "unanchored": []
 }

@@ -4,8 +4,8 @@
   "head": "7bc5c47b9df621f9dacebf065a42bc527d7487e0",
   "coverage": {
     "total": 37,
-    "specific": 12,
-    "broad": 15,
+    "specific": 14,
+    "broad": 13,
     "skim": 3,
     "uncovered": 7
   },
@@ -45,6 +45,13 @@
         },
         {
           "line": 16,
+          "kind": "hunk",
+          "spec": "hunk=\"b2af964\"",
+          "state": "exact",
+          "lines": 2
+        },
+        {
+          "line": 17,
           "kind": "symbol",
           "spec": "path=\"plugins/blender/export.py\" symbol=\"export_mesh\"",
           "state": "unsupported",
@@ -58,19 +65,19 @@
       "title": "Welding keeps vertex order",
       "author": "human",
       "risk": "medium",
-      "line": 26,
+      "line": 27,
       "claimed": 17,
       "shown": 9,
       "anchors": [
         {
-          "line": 27,
+          "line": 28,
           "kind": "path",
           "spec": "path=\"core/mesh/repair.py\"",
           "state": "exact",
           "lines": 13
         },
         {
-          "line": 28,
+          "line": 29,
           "kind": "lines",
           "spec": "path=\"core/mesh/legacy.py\" lines=\"1-4\" side=\"old\"",
           "state": "exact",
@@ -83,33 +90,33 @@
       "title": "Tests and fixtures",
       "author": "agent",
       "risk": "low",
-      "line": 32,
+      "line": 33,
       "claimed": 8,
       "shown": 8,
       "anchors": [
         {
-          "line": 33,
+          "line": 34,
           "kind": "glob",
           "spec": "glob=\"tests/**/*.py\"",
           "state": "exact",
           "lines": 5
         },
         {
-          "line": 34,
+          "line": 35,
           "kind": "glob",
           "spec": "glob=\"tests/fixtures/**\" skim",
           "state": "exact",
           "lines": 1
         },
         {
-          "line": 35,
+          "line": 36,
           "kind": "glob",
           "spec": "glob=\"*.lock\" skim",
           "state": "exact",
           "lines": 2
         },
         {
-          "line": 36,
+          "line": 37,
           "kind": "path",
           "spec": "path=\"core/mesh/gone.py\"",
           "state": "stale",
@@ -171,8 +178,8 @@
     {
       "path": "plugins/blender/export.py",
       "total": 5,
-      "specific": 0,
-      "broad": 5,
+      "specific": 2,
+      "broad": 3,
       "skim": 0,
       "uncovered": 0
     },
@@ -201,21 +208,65 @@
       "uncovered": 1
     }
   ],
+  "unreviewed": [
+    {
+      "id": "6fc9671",
+      "path": "README.md",
+      "line": 3,
+      "added": 1,
+      "deleted": 1,
+      "unclaimed": 2,
+      "total": 2
+    },
+    {
+      "id": "ca0fe3f",
+      "path": "core/mesh/legacy.py",
+      "line": 1,
+      "added": 0,
+      "deleted": 6,
+      "unclaimed": 2,
+      "total": 6
+    },
+    {
+      "id": "36ad9b6",
+      "path": "docs/new-name.md",
+      "added": 0,
+      "deleted": 0,
+      "unclaimed": 1,
+      "total": 1
+    },
+    {
+      "id": "d79883c",
+      "path": "logo.png",
+      "added": 0,
+      "deleted": 0,
+      "unclaimed": 1,
+      "total": 1
+    },
+    {
+      "id": "f66978a",
+      "path": "tools/run.sh",
+      "added": 0,
+      "deleted": 0,
+      "unclaimed": 1,
+      "total": 1
+    }
+  ],
   "errors": [],
   "warnings": [
     {
       "file": "story.md",
-      "line": 16,
+      "line": 17,
       "message": "anchor path=\"plugins/blender/export.py\" symbol=\"export_mesh\" claims nothing: symbol anchors are not resolved by this version yet"
     },
     {
       "file": "story.md",
-      "line": 32,
+      "line": 33,
       "message": "section tests has anchors but no prose"
     },
     {
       "file": "story.md",
-      "line": 36,
+      "line": 37,
       "message": "stale anchor path=\"core/mesh/gone.py\": core/mesh/gone.py is not changed in this diff"
     },
     {

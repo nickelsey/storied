@@ -43,9 +43,10 @@ func read(t *testing.T, f *fixture.Fixture, name string) string {
 	return string(data)
 }
 
+// draft runs the by-file fallback, which is the mode that writes sections.
 func draft(t *testing.T, f *fixture.Fixture) *Result {
 	t.Helper()
-	res, err := Run(ctx, Options{RepoDir: f.Repo.Dir})
+	res, err := Run(ctx, Options{RepoDir: f.Repo.Dir, ByFile: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -254,7 +255,7 @@ func TestDraftFollowsRebase(t *testing.T) {
 func TestDraftDryRun(t *testing.T) {
 	f := fresh(t)
 	story, manifest := read(t, f, "story.md"), read(t, f, "manifest.yaml")
-	res, err := Run(ctx, Options{RepoDir: f.Repo.Dir, DryRun: true})
+	res, err := Run(ctx, Options{RepoDir: f.Repo.Dir, DryRun: true, ByFile: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -292,7 +293,7 @@ func TestDraftErrors(t *testing.T) {
 	t.Run("missing artifacts do not stop a draft", func(t *testing.T) {
 		f := fresh(t)
 		f.EditBundle("manifest.yaml", "artifacts: []", "artifacts:\n  - id: later\n    kind: log\n    path: artifacts/later.log\n    provenance: { class: author }")
-		if _, err := Run(ctx, Options{RepoDir: f.Repo.Dir}); err != nil {
+		if _, err := Run(ctx, Options{RepoDir: f.Repo.Dir, ByFile: true}); err != nil {
 			t.Errorf("err = %v", err)
 		}
 		if !strings.Contains(read(t, f, "manifest.yaml"), "    hash: ") || !strings.HasSuffix(read(t, f, "manifest.yaml"), "provenance: { class: author }\n") {
@@ -414,4 +415,133 @@ func TestInit(t *testing.T) {
 			t.Errorf("on the default branch: err = %v", err)
 		}
 	})
+}
+
+// Without ByFile draft writes no sections: it lists the change blocks and
+// leaves the chapters to the author.
+func TestWorklist(t *testing.T) {
+	f := fresh(t)
+	story := read(t, f, "story.md")
+	res, err := Run(ctx, Options{RepoDir: f.Repo.Dir})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if read(t, f, "story.md") != story || statuses(res) != "kept:why" {
+		t.Errorf("draft changed the story; sections: %s", statuses(res))
+	}
+	if len(res.Blocks) != 13 {
+		t.Fatalf("%d blocks, want 13", len(res.Blocks))
+	}
+	for _, b := range res.Blocks {
+		if b.Section != "" || b.Unclaimed != b.Total {
+			t.Errorf("block %s is claimed by %q before any chapter was written", b.ID, b.Section)
+		}
+	}
+	res.Bundle = "BUNDLE"
+	js, err := json.MarshalIndent(res, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	golden(t, "worklist.json", string(js)+"\n")
+
+	// The author writes two chapters from the ids in the worklist: the
+	// algorithm, then every place that was rewired to use it.
+	f.WriteBundle("story.md", story+`
+## The repair pass {#algorithm author=agent}
+::anchor{hunk="d221e07"}
+::anchor{hunk="4cadd9b"}
+
+With welding fixed, the repair pass can be built on top of it.
+
+## Rewiring the exporter {#rewiring author=agent}
+::anchor{hunk="108c261"}
+::anchor{hunk="3502f0c"}
+::anchor{hunk="b2af964"}
+::anchor{hunk="ca0fe3f"}
+
+The exporter calls the new pass and the old one goes away.
+`)
+	written := read(t, f, "story.md")
+	res, err = Run(ctx, Options{RepoDir: f.Repo.Dir})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if read(t, f, "story.md") != written {
+		t.Error("draft rewrote chapters the author wrote")
+	}
+	claimed := map[string]string{}
+	loose := 0
+	for _, b := range res.Blocks {
+		if b.Section == "" {
+			loose++
+		}
+		claimed[b.ID] = b.Section
+	}
+	if claimed["d221e07"] != "algorithm" || claimed["b2af964"] != "rewiring" || claimed["ca0fe3f"] != "rewiring" || loose != 7 {
+		t.Errorf("claims = %v, %d unclaimed; want 7 unclaimed", claimed, loose)
+	}
+
+	// The author then changes the repair pass. Its block gets a new id, the
+	// chapter loses it, and draft says so; the other anchors still hold
+	// although every line number below the edit moved.
+	f.Repo.Write("core/mesh/repair.py", strings.Replace(repairSource(t, f), "    if not is_watertight(mesh):", "    # one pass is enough\n    if not is_watertight(mesh):", 1))
+	f.Repo.Write("plugins/blender/export.py", "# exporter\n"+exportSource(t, f))
+	f.Repo.Commit("comment")
+	res, err = Run(ctx, Options{RepoDir: f.Repo.Dir})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := `story.md:10: section algorithm: stale anchor hunk="d221e07": no change block has the id d221e07; the code it pointed at was edited or is no longer part of the diff`
+	if len(res.Attention) != 1 || res.Attention[0] != want {
+		t.Errorf("attention:\n%s\nwant:\n%s", strings.Join(res.Attention, "\n"), want)
+	}
+	for _, b := range res.Blocks {
+		switch {
+		case b.Path == "core/mesh/repair.py" && b.Added == 9:
+			if b.Section != "" {
+				t.Errorf("the edited block is still claimed by %s", b.Section)
+			}
+		case b.Path == "plugins/blender/export.py" && b.Line == 8:
+			if b.ID != "b2af964" || b.Section != "rewiring" {
+				t.Errorf("moved block = %s under %q, want b2af964 under rewiring", b.ID, b.Section)
+			}
+		}
+	}
+}
+
+func repairSource(t *testing.T, f *fixture.Fixture) string {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join(f.Repo.Dir, "core", "mesh", "repair.py"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(data)
+}
+
+func exportSource(t *testing.T, f *fixture.Fixture) string {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join(f.Repo.Dir, "plugins", "blender", "export.py"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(data)
+}
+
+func TestBlockLinesAreCapped(t *testing.T) {
+	f := fresh(t)
+	f.Repo.Write("big.txt", strings.Repeat("line\n", maxBlockLines+5))
+	f.Repo.Commit("big")
+	res, err := Run(ctx, Options{RepoDir: f.Repo.Dir, DryRun: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, b := range res.Blocks {
+		if b.Path == "big.txt" {
+			if len(b.Lines) != maxBlockLines || !b.Truncated || b.Added != maxBlockLines+5 {
+				t.Errorf("big block: %d lines listed, truncated %v, added %d", len(b.Lines), b.Truncated, b.Added)
+			}
+			return
+		}
+	}
+	t.Error("no block for big.txt")
 }

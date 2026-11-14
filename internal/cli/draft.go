@@ -9,6 +9,7 @@ import (
 
 	"storied/internal/bundle"
 	"storied/internal/draft"
+	"storied/internal/lint"
 )
 
 func runInit(args []string, stdout, stderr io.Writer) error {
@@ -46,11 +47,12 @@ func runDraft(args []string, stdout, stderr io.Writer) error {
 	fs.Lookup("base").Usage = "`branch` the PR targets (default: the manifest's base_ref)"
 	asJSON := fs.Bool("json", false, "write the sections and the changes under each as JSON")
 	dryRun := fs.Bool("dry-run", false, "show what would be drafted without writing")
+	byFile := fs.Bool("by-file", false, "also write a section with file anchors for each group of unexplained files")
 	if err := parse(fs, args); err != nil {
 		return err
 	}
 	res, err := draft.Run(context.Background(), draft.Options{
-		RepoDir: bf.repo, BundleDir: bf.bundle, Base: bf.base, Head: bf.head, DryRun: *dryRun,
+		RepoDir: bf.repo, BundleDir: bf.bundle, Base: bf.base, Head: bf.head, DryRun: *dryRun, ByFile: *byFile,
 	})
 	if err != nil {
 		return reportIssues(err, stderr)
@@ -80,13 +82,28 @@ func runDraft(args []string, stdout, stderr io.Writer) error {
 	for _, a := range res.Attention {
 		fmt.Fprintf(stdout, "check: %s\n", a)
 	}
+	var loose []lint.BlockReport
+	for _, b := range res.Blocks {
+		if b.Unclaimed > 0 {
+			loose = append(loose, b.BlockReport)
+		}
+	}
+	if len(loose) > 0 {
+		fmt.Fprintf(stdout, "%d of %s not in the story yet:\n", len(loose), plural(len(res.Blocks), "change block"))
+		lint.WriteBlocks(stdout, loose)
+		fmt.Fprintln(stdout, `attach each to the section that explains it with ::anchor{hunk="<id>"}`)
+	} else {
+		fmt.Fprintf(stdout, "every one of the %s is in the story\n", plural(len(res.Blocks), "change block"))
+	}
 	switch {
-	case *dryRun:
+	case *dryRun && *byFile:
 		fmt.Fprintf(stdout, "dry run: would write %s; nothing written\n", plural(added, "new section"))
-	case res.Written:
+	case *dryRun:
+		fmt.Fprintln(stdout, "dry run: nothing written")
+	case res.Written && added > 0:
 		fmt.Fprintf(stdout, "wrote %s to %s\n", plural(added, "new section"), res.Bundle)
-	default:
-		fmt.Fprintln(stdout, "the story already covers this diff; nothing written")
+	case res.Written:
+		fmt.Fprintf(stdout, "updated %s\n", res.Bundle)
 	}
 	if needProse > 0 {
 		fmt.Fprintf(stdout, "next: write the prose for %s, then run storied lint\n", plural(needProse, "section"))

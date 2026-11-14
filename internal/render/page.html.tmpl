@@ -17,7 +17,7 @@
 {{- template "bar" .Coverage}}</a></li>
 {{- end}}
 {{- if .Uncovered}}
-<li><a href="#uncovered"><span class="o-title">Not covered by the story</span>
+<li><a href="#uncovered"><span class="o-title">Unreviewed changes</span>
 <span class="o-meta">{{.Coverage.Uncovered}} {{if eq .Coverage.Uncovered 1}}line{{else}}lines{{end}}</span></a></li>
 {{- end}}
 {{- if .Agent}}
@@ -81,8 +81,8 @@
 {{- end}}
 {{- if .Uncovered}}
 <section class="story-section uncovered" id="uncovered">
-<h2>Not covered by the story</h2>
-<p class="note">No section explains these changes.</p>
+<h2>Unreviewed changes</h2>
+<p class="note">No section of the story refers to these changes.</p>
 {{- range .Uncovered}}
 {{template "file" .}}
 {{- end}}

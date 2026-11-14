@@ -124,6 +124,7 @@ See [the issue](https://example.com/issues/12) and <b>this raw HTML</b>.
 ## Repair pass in the exporter {#repair-pass author=agent risk=high}
 ::anchor{path="core/mesh/repair.py" lines="21-28"}
 ::anchor{path="plugins/blender/export.py"}
+::anchor{hunk="b2af964"}
 ::anchor{path="plugins/blender/export.py" symbol="export_mesh"}
 ::artifact{id="mesh-compare"}
 ::artifact{id="repair-notes"}

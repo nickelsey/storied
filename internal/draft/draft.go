@@ -26,6 +26,11 @@ type Options struct {
 	Base      string // branch or revision the PR targets; "" means the manifest's base_ref
 	Head      string // revision; "" means HEAD
 	DryRun    bool   // work out the result but write nothing
+	// ByFile adds a section with file anchors for every change the story
+	// does not explain, grouped by directory. Without it draft writes no
+	// sections: it reports the unexplained change blocks for a writer to
+	// attach to the chapters of the story.
+	ByFile bool
 }
 
 // Result describes the story after a draft run.
@@ -35,6 +40,9 @@ type Result struct {
 	Head     string        `json:"head"`
 	Written  bool          `json:"written"` // false on a dry run or when nothing changed
 	Sections []SectionInfo `json:"sections"`
+	// Blocks lists every change block of the diff: the worklist for
+	// whoever writes the story.
+	Blocks []BlockInfo `json:"blocks"`
 	// Attention lists things draft cannot fix and a person should look at.
 	Attention []string `json:"attention"`
 	// Unanchored lists changed files whose paths the story grammar cannot name.
@@ -53,6 +61,18 @@ type SectionInfo struct {
 	Anchors    []lint.AnchorReport `json:"anchors"`
 	Files      []FileInfo          `json:"files"`
 }
+
+// BlockInfo is one change block, the section it is shown under, and its
+// changed lines.
+type BlockInfo struct {
+	lint.BlockReport
+	Section   string   `json:"section,omitempty"` // id of the section it is shown under
+	Lines     []string `json:"lines"`             // changed lines, each starting with + or -
+	Truncated bool     `json:"truncated,omitempty"`
+}
+
+// maxBlockLines is the most changed lines listed for one block.
+const maxBlockLines = 60
 
 // FileInfo is the part of one file shown under a section.
 type FileInfo struct {
@@ -75,12 +95,15 @@ type HunkInfo struct {
 // ErrNoBundle is returned when the bundle directory has no manifest or story.
 var ErrNoBundle = errors.New("no bundle found")
 
-// Run drafts sections for every change the story does not explain yet.
+// Run brings the bundle up to date with the branch and reports every change
+// block with the section that explains it, if any.
 //
-// Sections a person wrote or edited are kept as they are. An agent section
-// whose text still matches the hash recorded when draft wrote it has not
-// been touched since, so it is dropped and proposed afresh. New sections
-// are appended to the story with anchors and no prose.
+// It never invents chapters: which changes belong together is for the
+// author to say. With ByFile it does the mechanical fallback and appends a
+// section with file anchors and no prose for each group of unexplained
+// files. Sections a person wrote or edited are then kept as they are, while
+// an agent section whose text still matches the hash recorded when draft
+// wrote it has not been touched since, so it is dropped and proposed afresh.
 func Run(ctx context.Context, opts Options) (*Result, error) {
 	repo, dir, err := lint.Locate(ctx, opts.RepoDir, opts.BundleDir)
 	if err != nil {
@@ -113,7 +136,7 @@ func Run(ctx context.Context, opts Options) (*Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	res := &Result{Bundle: dir, Base: d.Base, Head: d.Head, Sections: []SectionInfo{}, Attention: []string{}, Unanchored: []string{}}
+	res := &Result{Bundle: dir, Base: d.Base, Head: d.Head, Sections: []SectionInfo{}, Blocks: []BlockInfo{}, Attention: []string{}, Unanchored: []string{}}
 
 	// Sort the sections into those to keep and those to write afresh.
 	keep := make([]bool, len(story.Sections))
@@ -122,7 +145,7 @@ func Run(ctx context.Context, opts Options) (*Result, error) {
 	hashes := map[string]string{}
 	for i, sec := range story.Sections {
 		rec, recorded := m.Sections[sec.ID]
-		keep[i] = !(sec.Author == "agent" && recorded && rec.Hash == sec.Hash())
+		keep[i] = !(opts.ByFile && sec.Author == "agent" && recorded && rec.Hash == sec.Hash())
 		if keep[i] {
 			kept.Sections = append(kept.Sections, sec)
 			taken[sec.ID] = true
@@ -146,10 +169,14 @@ func Run(ctx context.Context, opts Options) (*Result, error) {
 			files = append(files, changed{path: d.Files[i].Path(), units: n})
 		}
 	}
-	proposals, unanchored := propose(files, taken)
-	res.Unanchored = append(res.Unanchored, unanchored...)
-	if len(kept.Sections) == 0 && len(proposals) == 0 {
-		return nil, errors.New("nothing to draft: the diff is empty and the story has no sections of its own")
+	var proposals []proposal
+	if opts.ByFile {
+		var unanchored []string
+		proposals, unanchored = propose(files, taken)
+		res.Unanchored = append(res.Unanchored, unanchored...)
+		if len(kept.Sections) == 0 && len(proposals) == 0 {
+			return nil, errors.New("nothing to draft: the diff is empty and the story has no sections of its own")
+		}
 	}
 
 	// Rebuild the story source: kept sections stay byte for byte, the
@@ -219,6 +246,29 @@ func Run(ctx context.Context, opts Options) (*Result, error) {
 			}
 		}
 		res.Sections = append(res.Sections, info)
+	}
+	for i, b := range final.Blocks {
+		info := BlockInfo{BlockReport: lint.DescribeBlock(final, i), Lines: []string{}}
+		for _, u := range b.Units {
+			if owner := final.Owner[u]; owner >= 0 {
+				info.Section = newStory.Sections[owner].ID
+				break
+			}
+		}
+		if b.Hunk >= 0 {
+			for _, l := range d.Files[b.File].Hunks[b.Hunk].Lines[b.First : b.Last+1] {
+				if len(info.Lines) == maxBlockLines {
+					info.Truncated = true
+					break
+				}
+				sign := "+"
+				if l.Kind == diff.Delete {
+					sign = "-"
+				}
+				info.Lines = append(info.Lines, sign+strings.TrimSuffix(l.Text, "\r"))
+			}
+		}
+		res.Blocks = append(res.Blocks, info)
 	}
 	for _, p := range res.Unanchored {
 		res.Attention = append(res.Attention, fmt.Sprintf("%s: the path cannot be written in an anchor, so no section covers it", p))

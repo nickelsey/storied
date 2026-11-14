@@ -31,6 +31,6 @@ The exporter now calls `repair_watertight` before writing.
 ## Test fixtures {#fixtures author=agent risk=low}
 ::anchor{glob="tests/fixtures/meshes/**" skim}
 ::anchor{glob="tests/export/{test_repair,test_export}.py"}
-::anchor{content="1111111111111111111111111111111111111111" path="tests/conftest.py"}
+::anchor{hunk="3fa9c21"}
 ::anchor{commit="2222222222222222222222222222222222222222"}
 ::artifact{id="export-tests"}

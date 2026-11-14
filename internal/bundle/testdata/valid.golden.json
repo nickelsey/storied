@@ -136,9 +136,8 @@
             "Line": 33
           },
           {
-            "Kind": "content",
-            "Path": "tests/conftest.py",
-            "PatchID": "1111111111111111111111111111111111111111",
+            "Kind": "hunk",
+            "Hunk": "3fa9c21",
             "Line": 34
           },
           {
