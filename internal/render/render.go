@@ -21,6 +21,7 @@ import (
 	"storied/internal/anchor"
 	"storied/internal/bundle"
 	"storied/internal/diff"
+	"storied/internal/gitx"
 	"storied/internal/lint"
 )
 
@@ -145,9 +146,9 @@ func Page(w io.Writer, res *lint.Result) error {
 		Repo:       b.Manifest.Repo,
 		PR:         b.Manifest.PR,
 		PRURL:      rd.prURL,
-		Base:       short(rep.Base),
-		Head:       short(rep.Head),
-		BundleHead: short(rep.BundleHead),
+		Base:       gitx.Short(rep.Base),
+		Head:       gitx.Short(rep.Head),
+		BundleHead: gitx.Short(rep.BundleHead),
 		Coverage:   newCoverageView(rep.Coverage),
 		Files:      len(r.Diff.Files),
 		CSS:        template.CSS(pageCSS),
@@ -427,7 +428,7 @@ func (rd *renderer) artifact(a bundle.Artifact) (artifactView, error) {
 		av.Source += ", " + a.Provenance.Command
 	}
 	if sha := a.Provenance.SHA; sha != "" && sha != rd.r.Diff.Head {
-		av.Outdated = short(sha)
+		av.Outdated = gitx.Short(sha)
 	}
 
 	read := func(rel string) ([]byte, error) {
@@ -482,11 +483,4 @@ func (rd *renderer) artifact(a bundle.Artifact) (artifactView, error) {
 	}
 	av.Placeholder = fmt.Sprintf("A %s artifact cannot be shown on a static page, and the bundle has no fallback image.", a.Kind)
 	return av, nil
-}
-
-func short(sha string) string {
-	if len(sha) == 40 {
-		return sha[:9]
-	}
-	return sha
 }

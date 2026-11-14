@@ -215,7 +215,7 @@ func Run(ctx context.Context, opts Options) (*Result, error) {
 		}
 		// Most often the bundle was written against commits this clone
 		// does not have.
-		rep.Errors = append(rep.Errors, Finding{Msg: fmt.Sprintf("cannot diff %s..%s: %v", short(base), short(head), err)})
+		rep.Errors = append(rep.Errors, Finding{Msg: fmt.Sprintf("cannot diff %s..%s: %v", gitx.Short(base), gitx.Short(head), err)})
 		return res, nil
 	}
 	rep.Base, rep.Head = d.Base, d.Head
@@ -260,7 +260,7 @@ func warnings(b *bundle.Bundle, r *anchor.Resolution, rep *Report) []Finding {
 
 	if rep.BundleHead != "" {
 		out = append(out, Finding{File: bundle.ManifestFile, Msg: fmt.Sprintf(
-			"head_sha is %s but the diff ends at %s; the bundle may be out of date", short(rep.BundleHead), short(rep.Head))})
+			"head_sha is %s but the diff ends at %s; the bundle may be out of date", gitx.Short(rep.BundleHead), gitx.Short(rep.Head))})
 	}
 	if len(r.Units) == 0 {
 		out = append(out, Finding{Msg: "the diff is empty"})
@@ -339,11 +339,4 @@ func Spec(a bundle.Anchor) string {
 		parts = append(parts, "skim")
 	}
 	return strings.Join(parts, " ")
-}
-
-func short(sha string) string {
-	if len(sha) == 40 {
-		return sha[:9]
-	}
-	return sha
 }

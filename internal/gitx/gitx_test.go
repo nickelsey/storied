@@ -60,3 +60,19 @@ func TestRunOutsideRepo(t *testing.T) {
 		t.Fatalf("Root() outside a repository: error = %v, want *gitx.Error", err)
 	}
 }
+
+func TestShort(t *testing.T) {
+	for in, want := range map[string]string{
+		"94545c99faf4f4b813ed21e15776123418fc971e":                         "94545c99f",
+		"94545c99faf4f4b813ed21e15776123418fc971e94545c99faf4f4b813ed21e1": "94545c99f",
+		"94545c9": "94545c9",
+		"main":    "main",
+		"HEAD~1":  "HEAD~1",
+		"":        "",
+		"a-branch-name-that-is-exactly-forty-char": "a-branch-name-that-is-exactly-forty-char",
+	} {
+		if got := gitx.Short(in); got != want {
+			t.Errorf("Short(%q) = %q, want %q", in, got, want)
+		}
+	}
+}

@@ -9,6 +9,7 @@ import (
 
 	"storied/internal/bundle"
 	"storied/internal/draft"
+	"storied/internal/gitx"
 	"storied/internal/lint"
 )
 
@@ -30,8 +31,8 @@ func runInit(args []string, stdout, stderr io.Writer) error {
 	}
 	fmt.Fprintf(stdout, "wrote %s\n", res.Bundle)
 	fmt.Fprintf(stdout, "  title  %s\n", res.Title)
-	fmt.Fprintf(stdout, "  base   %s (%s)\n", res.BaseRef, res.BaseSHA[:9])
-	fmt.Fprintf(stdout, "  head   %s\n", res.HeadSHA[:9])
+	fmt.Fprintf(stdout, "  base   %s (%s)\n", res.BaseRef, gitx.Short(res.BaseSHA))
+	fmt.Fprintf(stdout, "  head   %s\n", gitx.Short(res.HeadSHA))
 	if res.GitHub != "" {
 		fmt.Fprintf(stdout, "  repo   %s\n", res.GitHub)
 	}

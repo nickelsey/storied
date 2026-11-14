@@ -88,3 +88,17 @@ func checkRev(rev string) error {
 	}
 	return nil
 }
+
+// Short abbreviates a full commit SHA for display. Anything that is not a
+// full SHA-1 or SHA-256 commit id, such as a branch name, is returned as is.
+func Short(sha string) string {
+	if len(sha) != 40 && len(sha) != 64 {
+		return sha
+	}
+	for _, c := range sha {
+		if !strings.ContainsRune("0123456789abcdef", c) {
+			return sha
+		}
+	}
+	return sha[:9]
+}

@@ -5,6 +5,8 @@ import (
 	"io"
 	"strings"
 	"text/tabwriter"
+
+	"storied/internal/gitx"
 )
 
 // WriteText writes the report for a person reading a terminal.
@@ -20,7 +22,7 @@ func (r *Report) WriteText(w io.Writer) error {
 	}
 
 	fmt.Fprintf(&b, "%s\n", r.Title)
-	fmt.Fprintf(&b, "%s..%s, %s, %s\n\n", short(r.Base), short(r.Head),
+	fmt.Fprintf(&b, "%s..%s, %s, %s\n\n", gitx.Short(r.Base), gitx.Short(r.Head),
 		count(len(r.Files), "file"), count(r.Coverage.Total, "changed line"))
 
 	b.WriteString("Coverage\n")
