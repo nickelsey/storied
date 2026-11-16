@@ -55,6 +55,9 @@ func fixture(t *testing.T) (repo *gittest.Repo, base, head string) {
 	r.Write("add.txt", "new\n")
 	r.Write("empty.txt", "")
 	r.Git("add", "-A")
+	// Where symlinks are unsupported (Windows), add keeps link recorded as
+	// a symlink, so say outright that it is now a regular file.
+	r.Git("update-index", "--cacheinfo", "100644,"+r.Git("rev-parse", ":link")+",link")
 	// core.fileMode is off on Windows, so set the executable bit in the index.
 	r.Git("update-index", "--chmod=+x", "script.sh")
 	head = r.CommitIndex("head")
