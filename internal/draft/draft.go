@@ -12,11 +12,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"storied/internal/anchor"
-	"storied/internal/bundle"
-	"storied/internal/diff"
-	"storied/internal/gitx"
-	"storied/internal/lint"
+	"github.com/nickelsey/storied/internal/anchor"
+	"github.com/nickelsey/storied/internal/bundle"
+	"github.com/nickelsey/storied/internal/diff"
+	"github.com/nickelsey/storied/internal/gitx"
+	"github.com/nickelsey/storied/internal/lint"
 )
 
 // Options selects what to draft.

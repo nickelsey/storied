@@ -11,10 +11,10 @@ import (
 	"sort"
 	"strings"
 
-	"storied/internal/anchor"
-	"storied/internal/bundle"
-	"storied/internal/diff"
-	"storied/internal/gitx"
+	"github.com/nickelsey/storied/internal/anchor"
+	"github.com/nickelsey/storied/internal/bundle"
+	"github.com/nickelsey/storied/internal/diff"
+	"github.com/nickelsey/storied/internal/gitx"
 )
 
 // DefaultBundleDir is where a bundle lives, relative to the worktree root.

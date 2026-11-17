@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"storied/internal/gitx"
+	"github.com/nickelsey/storied/internal/gitx"
 )
 
 // Status says how a file changed between base and head.

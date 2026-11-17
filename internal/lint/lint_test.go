@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"storied/internal/fixture"
+	"github.com/nickelsey/storied/internal/fixture"
 )
 
 var update = flag.Bool("update", false, "rewrite golden files")

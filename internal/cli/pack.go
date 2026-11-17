@@ -7,8 +7,8 @@ import (
 	"io"
 	"strconv"
 
-	"storied/internal/gitx"
-	"storied/internal/pack"
+	"github.com/nickelsey/storied/internal/gitx"
+	"github.com/nickelsey/storied/internal/pack"
 )
 
 // publishFlags returns a flag set with the flags pack and fetch share.

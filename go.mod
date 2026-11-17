@@ -1,4 +1,4 @@
-module storied
+module github.com/nickelsey/storied
 
 go 1.27
 

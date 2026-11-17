@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"storied/internal/gittest"
-	"storied/internal/gitx"
+	"github.com/nickelsey/storied/internal/gittest"
+	"github.com/nickelsey/storied/internal/gitx"
 )
 
 func numbered(prefix string, n int) string {

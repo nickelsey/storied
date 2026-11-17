@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"storied/internal/diff"
+	"github.com/nickelsey/storied/internal/diff"
 )
 
 // MinIDLength is the shortest block id prefix an anchor may use, and the

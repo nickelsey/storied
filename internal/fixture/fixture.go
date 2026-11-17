@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"storied/internal/gittest"
+	"github.com/nickelsey/storied/internal/gittest"
 )
 
 // Fixture is a repository with a base commit, two commits on top of it, and

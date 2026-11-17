@@ -8,7 +8,7 @@ import (
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/lexers"
 
-	"storied/internal/diff"
+	"github.com/nickelsey/storied/internal/diff"
 )
 
 // maxHighlight is the size of one side of a hunk above which it is shown

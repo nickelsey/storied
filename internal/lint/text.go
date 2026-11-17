@@ -6,7 +6,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"storied/internal/gitx"
+	"github.com/nickelsey/storied/internal/gitx"
 )
 
 // WriteText writes the report for a person reading a terminal.

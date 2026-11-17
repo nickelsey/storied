@@ -13,9 +13,9 @@ import (
 
 	"github.com/alecthomas/chroma/v2/lexers"
 
-	"storied/internal/diff"
-	"storied/internal/fixture"
-	"storied/internal/lint"
+	"github.com/nickelsey/storied/internal/diff"
+	"github.com/nickelsey/storied/internal/fixture"
+	"github.com/nickelsey/storied/internal/lint"
 )
 
 var update = flag.Bool("update", false, "rewrite golden files")

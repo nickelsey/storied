@@ -11,9 +11,9 @@ import (
 	"strings"
 	"testing"
 
-	"storied/internal/bundle"
-	"storied/internal/fixture"
-	"storied/internal/lint"
+	"github.com/nickelsey/storied/internal/bundle"
+	"github.com/nickelsey/storied/internal/fixture"
+	"github.com/nickelsey/storied/internal/lint"
 )
 
 var update = flag.Bool("update", false, "rewrite golden files")

@@ -1,5 +1,5 @@
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
-LDFLAGS := -s -w -X storied/internal/cli.Version=$(VERSION)
+LDFLAGS := -s -w -X github.com/nickelsey/storied/internal/cli.Version=$(VERSION)
 PLATFORMS := darwin/arm64 linux/amd64 windows/amd64
 
 .PHONY: build test vet fmt check dist clean

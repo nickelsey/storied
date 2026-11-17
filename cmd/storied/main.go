@@ -4,7 +4,7 @@ package main
 import (
 	"os"
 
-	"storied/internal/cli"
+	"github.com/nickelsey/storied/internal/cli"
 )
 
 func main() {

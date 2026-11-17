@@ -6,8 +6,8 @@ import (
 
 	"github.com/bmatcuk/doublestar/v4"
 
-	"storied/internal/bundle"
-	"storied/internal/diff"
+	"github.com/nickelsey/storied/internal/bundle"
+	"github.com/nickelsey/storied/internal/diff"
 )
 
 // State says how an anchor fared against the diff.

@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"io"
 
-	"storied/internal/bundle"
-	"storied/internal/draft"
-	"storied/internal/gitx"
-	"storied/internal/lint"
+	"github.com/nickelsey/storied/internal/bundle"
+	"github.com/nickelsey/storied/internal/draft"
+	"github.com/nickelsey/storied/internal/gitx"
+	"github.com/nickelsey/storied/internal/lint"
 )
 
 func runInit(args []string, stdout, stderr io.Writer) error {

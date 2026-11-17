@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"storied/internal/fixture"
+	"github.com/nickelsey/storied/internal/fixture"
 )
 
 func runCLI(args ...string) (code int, stdout, stderr string) {
