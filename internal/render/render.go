@@ -175,7 +175,7 @@ func Page(w io.Writer, res *lint.Result) error {
 			ID: sec.ID, Title: sec.Title, Author: sec.Author, Risk: sec.Risk,
 			Shown:     len(res.Primary),
 			Elsewhere: len(res.Units) - len(res.Primary),
-			Files:     rd.files(res.Primary),
+			Files:     rd.files(res.Shown),
 		}
 		if sv.Body, err = renderMarkdown(sec.Body); err != nil {
 			return err
@@ -249,15 +249,18 @@ type renderer struct {
 	prURL string
 }
 
-// files builds the diff view of a set of units, which must be ascending.
-// A hunk is cut down to the changes in the set plus their context, so two
-// sections that explain different parts of one hunk each show their part.
+// files builds the diff view of a list of units, keeping their order. Each
+// run of units that goes forward through one file becomes one file view, so
+// a chapter that names a block of a.go, then b.go, then a.go again shows
+// a.go twice. A hunk is cut down to the changes in the set plus their
+// context, so two sections that explain different parts of one hunk each
+// show their part.
 func (rd *renderer) files(units []int) []fileView {
 	var out []fileView
 	for start := 0; start < len(units); {
 		fi := rd.r.Units[units[start]].File
-		end := start
-		for end < len(units) && rd.r.Units[units[end]].File == fi {
+		end := start + 1
+		for end < len(units) && rd.r.Units[units[end]].File == fi && units[end] > units[end-1] {
 			end++
 		}
 		out = append(out, rd.file(fi, units[start:end]))

@@ -62,6 +62,11 @@ type Section struct {
 	Claims  []Claim
 	Units   []int // every unit any of its anchors claims, ascending
 	Primary []int // the units shown under this section, ascending
+	// Shown holds the same units as Primary in the order the story names
+	// them: claim by claim, each claim's units ascending, each unit once.
+	// A chapter that walks from one file to another and back keeps that
+	// order.
+	Shown []int
 }
 
 // Resolution is a story resolved against a diff.
@@ -168,6 +173,18 @@ func Resolve(d *diff.Diff, story *bundle.Story, bundleBase, bundleHead string) *
 	for u, si := range r.Owner {
 		if si >= 0 {
 			r.Sections[si].Primary = append(r.Sections[si].Primary, u)
+		}
+	}
+	for si := range r.Sections {
+		sec := &r.Sections[si]
+		shown := map[int]bool{}
+		for _, c := range sec.Claims {
+			for _, u := range c.Units {
+				if r.Owner[u] == si && !shown[u] {
+					shown[u] = true
+					sec.Shown = append(sec.Shown, u)
+				}
+			}
 		}
 	}
 	return r

@@ -155,22 +155,6 @@ See <a href="https://example.com/issues/12">the issue</a> and <!-- raw HTML omit
 <div class="code">
 
 <details class="file" open>
-<summary><span class="path">core/mesh/legacy.py</span>
-<span class="f-meta">deleted · <span class="plus">+0</span> <span class="minus">−4</span></span></summary>
-<p class="f-link"><a href="https://github.com/org/cad-integration/pull/482/files#diff-465d8187b77caa355fdfc2a6de5027077ff553eac04037c06bdb131c604137da">Open this file in the PR</a></p>
-<table class="diff">
-<colgroup><col class="num"><col class="num"><col></colgroup>
-<tbody>
-<tr class="hh"><td colspan="3">⋯</td></tr>
-<tr class="del"><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-465d8187b77caa355fdfc2a6de5027077ff553eac04037c06bdb131c604137daL1">1</a></td><td class="n"></td><td class="c"><span class="hk">def</span> <span class="hf">close_mesh</span>(mesh):</td></tr>
-<tr class="del"><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-465d8187b77caa355fdfc2a6de5027077ff553eac04037c06bdb131c604137daL2">2</a></td><td class="n"></td><td class="c">    <span class="hc"># Old single-pass repair.</span></td></tr>
-<tr class="del"><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-465d8187b77caa355fdfc2a6de5027077ff553eac04037c06bdb131c604137daL3">3</a></td><td class="n"></td><td class="c">    mesh.fill()</td></tr>
-<tr class="del"><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-465d8187b77caa355fdfc2a6de5027077ff553eac04037c06bdb131c604137daL4">4</a></td><td class="n"></td><td class="c">    <span class="hk">return</span> mesh</td></tr>
-</tbody>
-</table>
-</details>
-
-<details class="file" open>
 <summary><span class="path">core/mesh/repair.py</span>
 <span class="f-meta">modified · <span class="plus">+3</span> <span class="minus">−2</span></span></summary>
 <p class="f-link"><a href="https://github.com/org/cad-integration/pull/482/files#diff-8439c8bfdbe84ea9da41c398ba6a34e0a6ec92484f141278785f8f41a3ae4bd2">Open this file in the PR</a></p>
@@ -192,6 +176,22 @@ See <a href="https://example.com/issues/12">the issue</a> and <!-- raw HTML omit
 </tbody>
 </table>
 </details>
+
+<details class="file" open>
+<summary><span class="path">core/mesh/legacy.py</span>
+<span class="f-meta">deleted · <span class="plus">+0</span> <span class="minus">−4</span></span></summary>
+<p class="f-link"><a href="https://github.com/org/cad-integration/pull/482/files#diff-465d8187b77caa355fdfc2a6de5027077ff553eac04037c06bdb131c604137da">Open this file in the PR</a></p>
+<table class="diff">
+<colgroup><col class="num"><col class="num"><col></colgroup>
+<tbody>
+<tr class="hh"><td colspan="3">⋯</td></tr>
+<tr class="del"><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-465d8187b77caa355fdfc2a6de5027077ff553eac04037c06bdb131c604137daL1">1</a></td><td class="n"></td><td class="c"><span class="hk">def</span> <span class="hf">close_mesh</span>(mesh):</td></tr>
+<tr class="del"><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-465d8187b77caa355fdfc2a6de5027077ff553eac04037c06bdb131c604137daL2">2</a></td><td class="n"></td><td class="c">    <span class="hc"># Old single-pass repair.</span></td></tr>
+<tr class="del"><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-465d8187b77caa355fdfc2a6de5027077ff553eac04037c06bdb131c604137daL3">3</a></td><td class="n"></td><td class="c">    mesh.fill()</td></tr>
+<tr class="del"><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-465d8187b77caa355fdfc2a6de5027077ff553eac04037c06bdb131c604137daL4">4</a></td><td class="n"></td><td class="c">    <span class="hk">return</span> mesh</td></tr>
+</tbody>
+</table>
+</details>
 </div>
 </section>
 <section class="row story-section" id="s-tests">
@@ -207,20 +207,6 @@ See <a href="https://example.com/issues/12">the issue</a> and <!-- raw HTML omit
 </figure>
 </div></div>
 <div class="code">
-
-<details class="file">
-<summary><span class="path">deps.lock</span>
-<span class="f-meta">modified · skim · <span class="plus">+1</span> <span class="minus">−1</span></span></summary>
-<p class="f-link"><a href="https://github.com/org/cad-integration/pull/482/files#diff-c87c3e89db09bebcc468a7565c93040b926bd9fd8877bef73060669d6d091466">Open this file in the PR</a></p>
-<table class="diff">
-<colgroup><col class="num"><col class="num"><col></colgroup>
-<tbody>
-<tr class="hh"><td colspan="3">⋯</td></tr>
-<tr class="del"><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-c87c3e89db09bebcc468a7565c93040b926bd9fd8877bef73060669d6d091466L1">1</a></td><td class="n"></td><td class="c">numpy==2.1.0</td></tr>
-<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-c87c3e89db09bebcc468a7565c93040b926bd9fd8877bef73060669d6d091466R1">1</a></td><td class="c">numpy==2.2.0</td></tr>
-</tbody>
-</table>
-</details>
 
 <details class="file" open>
 <summary><span class="path">tests/export/test_repair.py</span>
@@ -250,6 +236,20 @@ See <a href="https://example.com/issues/12">the issue</a> and <!-- raw HTML omit
 <tr class="ctx"><td class="n">1</td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-ad827d38a296d95264d9ea5292f70d196115bc96d81dc238802d97dc740c14b0R1">1</a></td><td class="c">v 0 0 0</td></tr>
 <tr class="ctx"><td class="n">2</td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-ad827d38a296d95264d9ea5292f70d196115bc96d81dc238802d97dc740c14b0R2">2</a></td><td class="c">v 1 0 0</td></tr>
 <tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-ad827d38a296d95264d9ea5292f70d196115bc96d81dc238802d97dc740c14b0R3">3</a></td><td class="c">v 1 1 0</td></tr>
+</tbody>
+</table>
+</details>
+
+<details class="file">
+<summary><span class="path">deps.lock</span>
+<span class="f-meta">modified · skim · <span class="plus">+1</span> <span class="minus">−1</span></span></summary>
+<p class="f-link"><a href="https://github.com/org/cad-integration/pull/482/files#diff-c87c3e89db09bebcc468a7565c93040b926bd9fd8877bef73060669d6d091466">Open this file in the PR</a></p>
+<table class="diff">
+<colgroup><col class="num"><col class="num"><col></colgroup>
+<tbody>
+<tr class="hh"><td colspan="3">⋯</td></tr>
+<tr class="del"><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-c87c3e89db09bebcc468a7565c93040b926bd9fd8877bef73060669d6d091466L1">1</a></td><td class="n"></td><td class="c">numpy==2.1.0</td></tr>
+<tr class="add"><td class="n"></td><td class="n"><a href="https://github.com/org/cad-integration/pull/482/files#diff-c87c3e89db09bebcc468a7565c93040b926bd9fd8877bef73060669d6d091466R1">1</a></td><td class="c">numpy==2.2.0</td></tr>
 </tbody>
 </table>
 </details>

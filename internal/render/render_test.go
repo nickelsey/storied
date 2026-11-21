@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -243,5 +244,70 @@ func TestHunkHighlightsEachSide(t *testing.T) {
 	if len(got) != 3 || !strings.Contains(string(got[1]), `<span class="hn">1</span>`) ||
 		!strings.Contains(string(got[2]), `<span class="hs">&#39;one&#39;</span>`) || strings.Contains(string(got[1]), "\r") {
 		t.Errorf("got %q", got)
+	}
+}
+
+func TestPageKeepsWrittenOrder(t *testing.T) {
+	f := fixture.New(t)
+	res, err := lint.Run(context.Background(), lint.Options{RepoDir: f.Repo.Dir})
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := res.Resolution
+	// Two blocks of one file and one of another, written a2, b, a1.
+	a1, a2, b := -1, -1, -1
+	first := map[int]int{}
+	for i, blk := range r.Blocks {
+		if blk.Hunk < 0 {
+			continue
+		}
+		if j, ok := first[blk.File]; ok && a2 < 0 {
+			a1, a2 = j, i
+		} else if !ok {
+			first[blk.File] = i
+		}
+	}
+	for i, blk := range r.Blocks {
+		if a1 >= 0 && blk.Hunk >= 0 && blk.File != r.Blocks[a1].File {
+			b = i
+			break
+		}
+	}
+	if a2 < 0 || b < 0 {
+		t.Fatal("the fixture has no file with two change blocks")
+	}
+	story := "---\ntitle: T\n---\n\n## Walk {#walk author=human}\n\nAcross two files and back.\n\n"
+	for _, i := range []int{a2, b, a1} {
+		story += "::anchor{hunk=\"" + r.ShortID[i] + "\"}\n"
+	}
+	f.WriteBundle("story.md", story)
+
+	page := renderFixture(t, f)
+	sec := page[strings.Index(page, `id="s-walk"`):strings.Index(page, `id="uncovered"`)]
+	var paths []string
+	for _, m := range regexp.MustCompile(`class="path">([^<]*)<`).FindAllStringSubmatch(sec, -1) {
+		paths = append(paths, m[1])
+	}
+	pa, pb := r.Diff.Files[r.Blocks[a1].File].Path(), r.Diff.Files[r.Blocks[b].File].Path()
+	if want := []string{pa, pb, pa}; !reflect.DeepEqual(paths, want) {
+		t.Errorf("files in the section: %q, want %q", paths, want)
+	}
+	// Each block's first line is linked to GitHub; the links must come in
+	// the written order.
+	link := func(i int) int {
+		blk := r.Blocks[i]
+		l := r.Diff.Files[blk.File].Hunks[blk.Hunk].Lines[blk.First]
+		ref := "#diff-" + pathHash(r.Diff.Files[blk.File].Path()) + "R" + strconv.Itoa(l.New) + `"`
+		if l.Kind == diff.Delete {
+			ref = "#diff-" + pathHash(r.Diff.Files[blk.File].Path()) + "L" + strconv.Itoa(l.Old) + `"`
+		}
+		at := strings.Index(sec, ref)
+		if at < 0 {
+			t.Fatalf("section has no link %s", ref)
+		}
+		return at
+	}
+	if x, y, z := link(a2), link(b), link(a1); !(x < y && y < z) {
+		t.Errorf("blocks appear at %d, %d, %d; want them in the written order", x, y, z)
 	}
 }
