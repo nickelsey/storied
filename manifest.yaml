@@ -1,0 +1,8 @@
+schema: storied/v1
+repo: nickelsey/storied
+pr: 1
+base_ref: main
+base_sha: 5dbf9a1b341ba3b145e26391997dc5ec5fd0b2ae
+head_sha: eedcab39346be9c192dafaccfa9bab90a0646217
+generated_by: {tool: storied/5dbf9a1-dirty}
+artifacts: []
