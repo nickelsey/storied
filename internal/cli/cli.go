@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"io"
 
-	"storied/internal/lint"
+	"github.com/nickelsey/storied/internal/lint"
 )
 
 // Version is the build version, set at link time with
-// -ldflags "-X storied/internal/cli.Version=...".
+// -ldflags "-X github.com/nickelsey/storied/internal/cli.Version=...".
 var Version = "dev"
 
 // Exit codes returned by Run.

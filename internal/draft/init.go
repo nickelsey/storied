@@ -12,9 +12,9 @@ import (
 
 	"go.yaml.in/yaml/v3"
 
-	"storied/internal/bundle"
-	"storied/internal/gitx"
-	"storied/internal/lint"
+	"github.com/nickelsey/storied/internal/bundle"
+	"github.com/nickelsey/storied/internal/gitx"
+	"github.com/nickelsey/storied/internal/lint"
 )
 
 // InitOptions describes the bundle to scaffold.
@@ -137,24 +137,20 @@ func Init(ctx context.Context, opts InitOptions) (*InitResult, error) {
 	return res, nil
 }
 
-// findBase returns the branch the PR targets and its merge base with head.
+// findBase returns the name of the branch the PR targets and its merge base
+// with head. The name is recorded without a remote prefix: main, not
+// origin/main.
 func findBase(ctx context.Context, repo gitx.Repo, want, headSHA string) (ref, sha string, err error) {
-	candidates := []string{want}
+	candidates := []string{branchName(ctx, repo, want)}
 	if want == "" {
 		candidates = nil
 		if def, err := line(ctx, repo, "symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD"); err == nil && def != "" {
-			candidates = append(candidates, def)
+			candidates = append(candidates, strings.TrimPrefix(def, "origin/"))
 		}
-		candidates = append(candidates, "origin/main", "origin/master", "main", "master")
+		candidates = append(candidates, "main", "master")
 	}
 	for _, c := range candidates {
-		if _, err := repo.RevParse(ctx, c); err != nil {
-			if want != "" {
-				return "", "", fmt.Errorf("resolve base: %w", err)
-			}
-			continue
-		}
-		mb, err := repo.MergeBase(ctx, c, headSHA)
+		mb, err := mergeBase(ctx, repo, c, headSHA)
 		if err != nil {
 			if want != "" {
 				return "", "", fmt.Errorf("no common ancestor of %s and the head: %w", c, err)
@@ -170,6 +166,37 @@ func findBase(ctx context.Context, repo gitx.Repo, want, headSHA string) (ref, s
 		return c, mb, nil
 	}
 	return "", "", errors.New("cannot tell which branch this one targets; pass --base <branch>")
+}
+
+// branchName drops the origin/ prefix from the name of a remote-tracking
+// branch, so that the bundle records the branch and not one clone's view of it.
+func branchName(ctx context.Context, repo gitx.Repo, ref string) string {
+	if name, ok := strings.CutPrefix(ref, "origin/"); ok && name != "" {
+		if _, err := repo.RevParse(ctx, "refs/remotes/"+ref); err == nil {
+			return name
+		}
+	}
+	return ref
+}
+
+// mergeBase returns the merge base of the target branch and head. A branch
+// can exist both locally and as origin/<name>, and either can be behind the
+// other: a local main that was never pulled, or one with commits not pushed
+// yet. The one that has more of head's history gives the smaller, truer diff,
+// so it wins; origin wins when neither contains the other.
+func mergeBase(ctx context.Context, repo gitx.Repo, name, headSHA string) (string, error) {
+	local, localErr := repo.MergeBase(ctx, name, headSHA)
+	remote, remoteErr := repo.MergeBase(ctx, "refs/remotes/origin/"+name, headSHA)
+	switch {
+	case remoteErr != nil:
+		return local, localErr
+	case localErr != nil || local == remote:
+		return remote, nil
+	}
+	if _, err := repo.Run(ctx, "merge-base", "--is-ancestor", remote, local); err == nil {
+		return local, nil
+	}
+	return remote, nil
 }
 
 // defaultTitle uses the commit subject for a one-commit branch, and the

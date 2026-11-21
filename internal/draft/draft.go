@@ -12,11 +12,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"storied/internal/anchor"
-	"storied/internal/bundle"
-	"storied/internal/diff"
-	"storied/internal/gitx"
-	"storied/internal/lint"
+	"github.com/nickelsey/storied/internal/anchor"
+	"github.com/nickelsey/storied/internal/bundle"
+	"github.com/nickelsey/storied/internal/diff"
+	"github.com/nickelsey/storied/internal/gitx"
+	"github.com/nickelsey/storied/internal/lint"
 )
 
 // Options selects what to draft.
@@ -208,7 +208,7 @@ func Run(ctx context.Context, opts Options) (*Result, error) {
 		}
 	}
 	fields := [][2]string{{"base_sha", d.Base}, {"head_sha", d.Head}}
-	if opts.Base != "" {
+	if baseRef != "" && baseRef != m.BaseRef { // --base, or a name recorded as origin/<branch>
 		fields = append(fields, [2]string{"base_ref", yamlString(baseRef)})
 	}
 	newManifest, err := bundle.UpdateManifest(manifestSrc, fields, hashes)
@@ -311,7 +311,8 @@ func computeDiff(ctx context.Context, repo gitx.Repo, m *bundle.Manifest, opts O
 		baseRef = m.BaseRef
 	}
 	if baseRef != "" {
-		mb, err := repo.MergeBase(ctx, baseRef, headSHA)
+		baseRef = branchName(ctx, repo, baseRef)
+		mb, err := mergeBase(ctx, repo, baseRef, headSHA)
 		switch {
 		case err == nil:
 			base = mb

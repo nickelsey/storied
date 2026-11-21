@@ -21,10 +21,10 @@ import (
 
 	"go.yaml.in/yaml/v3"
 
-	"storied/internal/bundle"
-	"storied/internal/draft"
-	"storied/internal/gitx"
-	"storied/internal/lint"
+	"github.com/nickelsey/storied/internal/bundle"
+	"github.com/nickelsey/storied/internal/draft"
+	"github.com/nickelsey/storied/internal/gitx"
+	"github.com/nickelsey/storied/internal/lint"
 )
 
 // MarkerFile is written into a fetched bundle and names the commit it came

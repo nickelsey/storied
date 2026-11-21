@@ -8,8 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"storied/internal/lint"
-	"storied/internal/render"
+	"github.com/nickelsey/storied/internal/lint"
+	"github.com/nickelsey/storied/internal/render"
 )
 
 func runRender(args []string, stdout, stderr io.Writer) error {

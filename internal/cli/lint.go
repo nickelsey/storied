@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"io"
 
-	"storied/internal/lint"
+	"github.com/nickelsey/storied/internal/lint"
 )
 
 func runLint(args []string, stdout, stderr io.Writer) error {

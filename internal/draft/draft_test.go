@@ -11,9 +11,9 @@ import (
 	"strings"
 	"testing"
 
-	"storied/internal/bundle"
-	"storied/internal/fixture"
-	"storied/internal/lint"
+	"github.com/nickelsey/storied/internal/bundle"
+	"github.com/nickelsey/storied/internal/fixture"
+	"github.com/nickelsey/storied/internal/lint"
 )
 
 var update = flag.Bool("update", false, "rewrite golden files")
@@ -352,6 +352,47 @@ func TestInit(t *testing.T) {
 			if b.Manifest.Repo != "org/cad-integration" || b.Manifest.PR != 482 || b.Story.Title != `fix: "quotes" # and: colons` {
 				t.Errorf("manifest %+v, title %q", b.Manifest, b.Story.Title)
 			}
+		}
+	})
+
+	t.Run("records the branch name, whichever copy is ahead", func(t *testing.T) {
+		for _, tc := range []struct {
+			name          string
+			base          string
+			local, remote string // where main and origin/main point: "base" or "mid"
+			want          string
+		}{
+			{"origin only named", "origin/main", "base", "base", "base"},
+			{"origin ahead of a stale local branch", "", "base", "mid", "mid"},
+			{"local branch ahead of origin", "", "mid", "base", "mid"},
+		} {
+			f := fixture.New(t)
+			os.RemoveAll(f.Bundle)
+			at := map[string]string{"base": f.Base, "mid": f.Repo.Git("rev-parse", f.Head+"~1")}
+			f.Repo.Git("branch", "-f", "main", at[tc.local])
+			f.Repo.Git("update-ref", "refs/remotes/origin/main", at[tc.remote])
+			res, err := Init(ctx, InitOptions{RepoDir: f.Repo.Dir, Base: tc.base})
+			if err != nil {
+				t.Fatalf("%s: %v", tc.name, err)
+			}
+			if res.BaseRef != "main" || res.BaseSHA != at[tc.want] {
+				t.Errorf("%s: base %s at %s, want main at %s", tc.name, res.BaseRef, res.BaseSHA, at[tc.want])
+			}
+			if d, err := Run(ctx, Options{RepoDir: f.Repo.Dir}); err != nil || d.Base != at[tc.want] {
+				t.Errorf("%s: draft base %v, err %v", tc.name, d, err)
+			}
+		}
+	})
+
+	t.Run("draft drops the remote prefix from an older bundle", func(t *testing.T) {
+		f := fixture.New(t)
+		f.Repo.Git("update-ref", "refs/remotes/origin/main", f.Base)
+		f.EditBundle("manifest.yaml", "base_ref: main", "base_ref: origin/main")
+		if _, err := Run(ctx, Options{RepoDir: f.Repo.Dir}); err != nil {
+			t.Fatal(err)
+		}
+		if m := read(t, f, "manifest.yaml"); !strings.Contains(m, "base_ref: main\n") {
+			t.Errorf("manifest:\n%s", m)
 		}
 	})
 
