@@ -355,6 +355,35 @@ func TestInit(t *testing.T) {
 		}
 	})
 
+	t.Run("records the branch name, whichever copy is ahead", func(t *testing.T) {
+		for _, tc := range []struct {
+			name          string
+			base          string
+			local, remote string // where main and origin/main point: "base" or "mid"
+			want          string
+		}{
+			{"origin only named", "origin/main", "base", "base", "base"},
+			{"origin ahead of a stale local branch", "", "base", "mid", "mid"},
+			{"local branch ahead of origin", "", "mid", "base", "mid"},
+		} {
+			f := fixture.New(t)
+			os.RemoveAll(f.Bundle)
+			at := map[string]string{"base": f.Base, "mid": f.Repo.Git("rev-parse", f.Head+"~1")}
+			f.Repo.Git("branch", "-f", "main", at[tc.local])
+			f.Repo.Git("update-ref", "refs/remotes/origin/main", at[tc.remote])
+			res, err := Init(ctx, InitOptions{RepoDir: f.Repo.Dir, Base: tc.base})
+			if err != nil {
+				t.Fatalf("%s: %v", tc.name, err)
+			}
+			if res.BaseRef != "main" || res.BaseSHA != at[tc.want] {
+				t.Errorf("%s: base %s at %s, want main at %s", tc.name, res.BaseRef, res.BaseSHA, at[tc.want])
+			}
+			if d, err := Run(ctx, Options{RepoDir: f.Repo.Dir}); err != nil || d.Base != at[tc.want] {
+				t.Errorf("%s: draft base %v, err %v", tc.name, d, err)
+			}
+		}
+	})
+
 	t.Run("one commit gives its subject as the title", func(t *testing.T) {
 		f := fixture.New(t)
 		os.RemoveAll(f.Bundle)

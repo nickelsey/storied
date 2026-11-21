@@ -311,7 +311,8 @@ func computeDiff(ctx context.Context, repo gitx.Repo, m *bundle.Manifest, opts O
 		baseRef = m.BaseRef
 	}
 	if baseRef != "" {
-		mb, err := repo.MergeBase(ctx, baseRef, headSHA)
+		baseRef = branchName(ctx, repo, baseRef)
+		mb, err := mergeBase(ctx, repo, baseRef, headSHA)
 		switch {
 		case err == nil:
 			base = mb
