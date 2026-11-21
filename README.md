@@ -27,7 +27,9 @@ An id survives a rebase and edits elsewhere in the file. It changes only
 when the block's own lines change, and then the block shows up as unreviewed
 until it is attached again. `storied draft` lists every block with its id
 and the chapter that claims it. A chapter can also claim whole files
-(`path`, `glob`) or a line range (`lines`).
+(`path`, `glob`) or a line range (`lines`). The page shows a chapter's code
+in the order its anchors are written, so a chapter can move between files
+and come back.
 
 ## Build
 

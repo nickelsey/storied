@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 
@@ -390,5 +391,58 @@ func TestAmbiguousHunkPrefix(t *testing.T) {
 				t.Errorf("short id %q of block %d also matches block %d", id, i, j)
 			}
 		}
+	}
+}
+
+// interleaved picks two blocks of one file and a block of another, and
+// returns them in the order a.later, b, a.earlier.
+func interleaved(t *testing.T, r *anchor.Resolution) [3]int {
+	t.Helper()
+	first := map[int]int{} // file to its first block
+	for i, b := range r.Blocks {
+		if b.Hunk < 0 {
+			continue
+		}
+		if j, ok := first[b.File]; !ok {
+			first[b.File] = i
+		} else {
+			for k, other := range r.Blocks {
+				if other.File != b.File && other.Hunk >= 0 {
+					return [3]int{i, k, j}
+				}
+			}
+		}
+	}
+	t.Fatal("the fixture has no file with two change blocks")
+	return [3]int{}
+}
+
+func TestShownKeepsWrittenOrder(t *testing.T) {
+	f := fixture.New(t)
+	r, _ := resolve(t, f, head+"## A {#a author=human}\n", true)
+	picks := interleaved(t, r)
+	story := head + "## Walk {#walk author=human}\n"
+	var want []int
+	for _, bi := range picks {
+		story += fmt.Sprintf("::anchor{hunk=%q}\n", r.ShortID[bi])
+		want = append(want, r.Blocks[bi].Units...)
+	}
+	// A broad anchor after them adds the rest of the first file in diff
+	// order, without repeating what is already shown.
+	path := r.Diff.Files[r.Blocks[picks[0]].File].Path()
+	story += fmt.Sprintf("::anchor{path=%q}\n", path)
+
+	r, _ = resolve(t, f, story, true)
+	sec := r.Sections[0]
+	for _, u := range sec.Primary {
+		if r.Diff.Files[r.Units[u].File].Path() == path && !slices.Contains(want, u) {
+			want = append(want, u)
+		}
+	}
+	if !reflect.DeepEqual(sec.Shown, want) {
+		t.Errorf("Shown:\n%s\nwant:\n%s", describeAll(r, sec.Shown), describeAll(r, want))
+	}
+	if !slices.IsSorted(sec.Primary) || len(sec.Primary) != len(sec.Shown) {
+		t.Errorf("Primary %v should hold the same units as Shown, ascending", sec.Primary)
 	}
 }

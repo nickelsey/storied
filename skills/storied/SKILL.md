@@ -51,6 +51,11 @@ Order the sections so each one only relies on those before it: groundwork,
 then the main change, then the call sites that use it, then tests, then
 mechanical fallout.
 
+Within a section, list the anchors in the order the prose walks through
+them. The page shows the code in that order, so a section can go from the
+new function in one file to its caller in another and back to the first
+file for the cleanup.
+
 Keep a section under about 400 changed lines. If it is larger, it is
 probably two steps.
 
