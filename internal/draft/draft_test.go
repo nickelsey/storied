@@ -384,6 +384,18 @@ func TestInit(t *testing.T) {
 		}
 	})
 
+	t.Run("draft drops the remote prefix from an older bundle", func(t *testing.T) {
+		f := fixture.New(t)
+		f.Repo.Git("update-ref", "refs/remotes/origin/main", f.Base)
+		f.EditBundle("manifest.yaml", "base_ref: main", "base_ref: origin/main")
+		if _, err := Run(ctx, Options{RepoDir: f.Repo.Dir}); err != nil {
+			t.Fatal(err)
+		}
+		if m := read(t, f, "manifest.yaml"); !strings.Contains(m, "base_ref: main\n") {
+			t.Errorf("manifest:\n%s", m)
+		}
+	})
+
 	t.Run("one commit gives its subject as the title", func(t *testing.T) {
 		f := fixture.New(t)
 		os.RemoveAll(f.Bundle)

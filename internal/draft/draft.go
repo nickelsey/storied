@@ -208,7 +208,7 @@ func Run(ctx context.Context, opts Options) (*Result, error) {
 		}
 	}
 	fields := [][2]string{{"base_sha", d.Base}, {"head_sha", d.Head}}
-	if opts.Base != "" {
+	if baseRef != "" && baseRef != m.BaseRef { // --base, or a name recorded as origin/<branch>
 		fields = append(fields, [2]string{"base_ref", yamlString(baseRef)})
 	}
 	newManifest, err := bundle.UpdateManifest(manifestSrc, fields, hashes)
